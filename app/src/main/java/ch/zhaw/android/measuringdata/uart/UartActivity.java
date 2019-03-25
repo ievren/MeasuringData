@@ -136,7 +136,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                     if (btnConnectDisconnect.getText().equals("Connect")){
 
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
-                        try {
+                        /*try {
                             boolean connected = mService.connect(saved_device);
                             if(connected ==true){
                                 mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(saved_device);
@@ -145,7 +145,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
                         }catch (Exception ignore) {
                             Log.e(TAG, ignore.toString());
-                        }
+                        }*/
                         if(mState !=UART_PROFILE_CONNECTED){
                             Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
                             startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
@@ -189,6 +189,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         // load saved DEVICE Adress: -> String saved_device
         loadData();
 
+        //perform a Click
+        btnConnectDisconnect.performClick();
+
     }
 
 
@@ -205,6 +208,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
+            else {
             else {
                 btServiceBound = true;
 
@@ -350,7 +354,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
         editor.putString(DEVICE, deviceAddress);
         editor.apply();
-        Toast.makeText(this, "Data saved", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Device saved", Toast.LENGTH_SHORT).show();
     }
 
     public void loadData() {

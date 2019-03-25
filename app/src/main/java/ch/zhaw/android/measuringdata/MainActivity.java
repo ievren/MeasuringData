@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             final Intent intent = new Intent(this, UartActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            finish();
+            //finish();
         }, DURATION);
     }
 

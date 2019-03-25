@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -80,11 +81,12 @@ public class DeviceListActivity extends Activity {
     private Handler mHandler;
     private boolean mScanning;
 
-
+    public static final String SHARED_PREFS = "sharedPrefs";
+    public static final String DEVICE = "saved_device";
+    String autoConnectDevice = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_bar);
@@ -93,6 +95,10 @@ public class DeviceListActivity extends Activity {
         layoutParams.gravity= Gravity.TOP;
         layoutParams.y = 200;
         mHandler = new Handler();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        autoConnectDevice = sharedPreferences.getString(DEVICE, "");
+
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -136,6 +142,7 @@ public class DeviceListActivity extends Activity {
         ListView newDevicesListView = (ListView) findViewById(R.id.new_devices);
         newDevicesListView.setAdapter(deviceAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
+
         scanLeDevice(true);
 
     }
@@ -154,6 +161,7 @@ public class DeviceListActivity extends Activity {
             }, SCAN_PERIOD);
             mScanning = true;
             mBluetoothAdapter.startLeScan(mLeScanCallback);
+
             cancelButton.setText(R.string.cancel);
         } else {
             mScanning = false;
@@ -171,7 +179,21 @@ public class DeviceListActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            addDevice(device,rssi);
+                            if (device.getAddress().equals(autoConnectDevice)) {
+                                //TODO Device is the Device from last time
+                                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                                Bundle b = new Bundle();
+                                b.putString(BluetoothDevice.EXTRA_DEVICE, autoConnectDevice);
+
+                                Intent result = new Intent();
+                                result.putExtras(b);
+                                setResult(Activity.RESULT_OK, result);
+                                finish();
+
+                            }
+                            else {
+                                addDevice(device, rssi);
+                            }
                         }
                     });
                 }
@@ -185,6 +207,7 @@ public class DeviceListActivity extends Activity {
                 deviceFound = true;
                 break;
             }
+
         }
         devRssiValues.put(device.getAddress(), rssi);
         if (!deviceFound) {
