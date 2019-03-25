@@ -95,6 +95,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.v(TAG, "<----- onCreate ---->");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 

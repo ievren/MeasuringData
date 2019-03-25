@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -21,7 +22,12 @@ import ch.zhaw.android.measuringdata.chart.ChartActivity;
 import ch.zhaw.android.measuringdata.uart.UartActivity;
 import ch.zhaw.android.measuringdata.uart.UartService;
 
+enum State{IDLE,CONNECT, READ_DATA, DISPLAY}
+
 public class Engine extends AsyncTask {
+
+    private static final long DURATION = 2000 ;
+    private Context context;
 
     static String TAG="Engine";
     ChartActivity   chart;;
@@ -29,6 +35,7 @@ public class Engine extends AsyncTask {
     Data            data;
     UartService     btService; //Bluetooth Connection
     Intent          btBindIntent;
+
     boolean         display;
     boolean         connect;
     boolean         btServiceBound=false;
@@ -38,7 +45,10 @@ public class Engine extends AsyncTask {
     State               state=State.IDLE;
     ArrayList<Entry>    lastData;
     int delay;
-    public Engine() {
+
+
+    public Engine(Context context) {
+        this.context = context;
     }
 
     public void setChart(ChartActivity chart) {
@@ -57,6 +67,21 @@ public class Engine extends AsyncTask {
 
     public void setRun(boolean run) {
         this.run = run;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        Log.d(TAG, "onPreExecute");
+        new Handler().postDelayed(() -> {
+            final Intent intent = new Intent(context, UartActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            context.startActivity(intent);
+            //finish();
+        }, DURATION);
+        state=State.CONNECT;
+
+
     }
 
     @Override
@@ -95,10 +120,7 @@ public class Engine extends AsyncTask {
 
         switch(state){
             case IDLE:
-                if(uart!=null) {
-                    uart.bindBtService();
-                    state=State.CONNECT;
-                }
+                //state=State.CONNECT;
                 break;
             case CONNECT:
                 //check if a BT-Connection has been made
@@ -107,7 +129,7 @@ public class Engine extends AsyncTask {
                     btServiceState = btService.checkConnectionEstablished();
                 }
                 if(btServiceState==2) {
-
+                    Log.v(TAG, "Connection established");
                     //state= State.READ_DATA;
                 }
                 break;
@@ -132,19 +154,15 @@ public class Engine extends AsyncTask {
 
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        Log.d(TAG, "onPreExecute");
 
-
-    }
 
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
 
         Log.d(TAG, "onPostExecute");
+
+
     }
 
     @Override
@@ -171,12 +189,8 @@ public class Engine extends AsyncTask {
                 chart.plot(lastData);
             }
         }
+
+
         //Log.d(TAG, "onProgressUpdate");
     }
-
-    enum State{IDLE,CONNECT, READ_DATA, DISPLAY}
-
-
-
-
 }

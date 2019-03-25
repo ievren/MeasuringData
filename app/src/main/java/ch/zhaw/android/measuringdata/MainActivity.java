@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static final String TAG = "MeasuringApp";
-    private static final long DURATION = 2000;
     public static MainActivity obj;
 
     Intent          chartIntent;
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         data=new Data();
-        engine=new Engine();
+        engine=new Engine(this);
         engine.setChart(null);
         engine.setData(data);
         engine.setBtService(btService);
@@ -76,12 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityStore.put("main",this);
 
-        new Handler().postDelayed(() -> {
-            final Intent intent = new Intent(this, UartActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-            //finish();
-        }, DURATION);
+
     }
 
     @Override
