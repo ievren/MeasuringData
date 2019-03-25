@@ -55,17 +55,6 @@
     <LinearLayout android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/permission_rationale"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:paddingEnd="26dp"
-            android:paddingStart="26dp"
-            android:text="@string/scanner_permission_rationale"
-            android:visibility="gone"/>
-
         <ListView
             android:id="@+id/new_devices"
             android:layout_width="fill_parent"
@@ -85,7 +74,6 @@
 
         <Button
             android:id="@+id/btn_cancel"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@android:string/cancel" />

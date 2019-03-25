@@ -9,5 +9,8 @@
     <dimen name="activity_vertical_margin_bottom">32dp</dimen>
     <dimen name="activity_vertical_margin_top">50dp</dimen>
     <dimen name="toolbar_title_margin">32dp</dimen>
+    <dimen name="alert_dialog_padding_bottom">0dp</dimen>
+    <dimen name="alert_dialog_padding">24dp</dimen>
+    <dimen name="alert_dialog_padding_top">18dp</dimen>
 
 </resources>

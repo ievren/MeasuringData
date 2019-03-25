@@ -36,6 +36,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,6 +45,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -59,14 +61,17 @@ import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import butterknife.OnClick;
 import ch.zhaw.android.measuringdata.R;
 import ch.zhaw.android.measuringdata.utils.Utils;
 
+import static android.app.PendingIntent.getActivity;
+
 public class UartActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
     private static final int REQUEST_SELECT_DEVICE = 1;
-    private static final int REQUEST_ACCESS_COARSE_LOCATION = 1022; // random number
+    private final static int REQUEST_PERMISSION_REQ_CODE = 34; // any 8-bit number
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int UART_PROFILE_READY = 10;
     public static final String TAG = "nRFUART";
@@ -84,10 +89,14 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private ArrayAdapter<String> listAdapter;
     private Button btnConnectDisconnect,btnSend;
     private EditText edtMessage;
+    private Context permissonContext;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter == null) {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
@@ -104,8 +113,16 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         service_init();
         Log.d(TAG, "onServiceConnected mService= " + mService);
 
-     
-       
+
+        //Check Permissions
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions( (Activity) permissonContext,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            Log.i(TAG, "UART Activity started: Asked for permission");
+            return;
+        }
+
+
+
         // Handle Disconnect & Connect button
         btnConnectDisconnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -426,4 +443,6 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             .show();
         }
     }
+
+
 }
