@@ -1,38 +1,54 @@
 package ch.zhaw.android.measuringdata.engine;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
 
+
+import androidx.appcompat.app.AppCompatActivity;
 import ch.zhaw.android.measuringdata.ActivityStore;
+import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.chart.ChartActivity;
+import ch.zhaw.android.measuringdata.uart.UartActivity;
+import ch.zhaw.android.measuringdata.uart.UartService;
 
 public class Engine extends AsyncTask {
 
     static String TAG="Engine";
-    enum State{IDLE,CONNECT, READ_DATA, DISPLAY};
-
-    ChartActivity chart;
-    Data data;
-    boolean display;
-    boolean connected;
-
-    boolean loop=true;
-    boolean run=false;
-    State state=State.IDLE;
-    ArrayList<Entry> lastData;
+    ChartActivity   chart;;
+    UartActivity    uart;
+    Data            data;
+    UartService     btService; //Bluetooth Connection
+    Intent          btBindIntent;
+    boolean         display;
+    boolean         connect;
+    boolean         btServiceBound=false;
+    int             btServiceState=0;  //0=Disconnected, 1=Connecting, 2=Connected
+    boolean             loop=true;
+    boolean             run=false;
+    State               state=State.IDLE;
+    ArrayList<Entry>    lastData;
     int delay;
-
-
     public Engine() {
     }
 
     public void setChart(ChartActivity chart) {
         this.chart = chart;
+    }
+
+    public void setBtService(UartService btService) {
+        this.btService = btService;
+
+
     }
 
     public void setData(Data data) {
@@ -68,14 +84,31 @@ public class Engine extends AsyncTask {
                 chart=(ChartActivity) ActivityStore.get("chart");
             }
         }
+        if(uart==null){
+            uart= (UartActivity) ActivityStore.get("uart");
+        }else{
+            if(uart!=(UartActivity) ActivityStore.get("uart")){
+                uart=(UartActivity) ActivityStore.get("uart");
+            }
+        }
+
 
         switch(state){
             case IDLE:
-                state=State.CONNECT;
+                if(uart!=null) {
+                    uart.bindBtService();
+                    state=State.CONNECT;
+                }
                 break;
             case CONNECT:
-                if(connected==true) {
-                    state = State.READ_DATA;
+                //check if a BT-Connection has been made
+                btServiceBound = uart.checkBtServiceBound();
+                if(btServiceBound) {
+                    btServiceState = btService.checkConnectionEstablished();
+                }
+                if(btServiceState==2) {
+
+                    //state= State.READ_DATA;
                 }
                 break;
             case READ_DATA:
@@ -103,6 +136,8 @@ public class Engine extends AsyncTask {
     protected void onPreExecute() {
         super.onPreExecute();
         Log.d(TAG, "onPreExecute");
+
+
     }
 
     @Override
@@ -115,10 +150,22 @@ public class Engine extends AsyncTask {
     @Override
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
+        if(uart==null){
+            uart = (UartActivity) ActivityStore.get("uart");
+        }
+        else {
+            if(connect){
+                connect = false;
+                //uart.btnConnectDisconnect.performClick();
+            }
+
+        }
+
 
         if(chart==null) {
             chart = (ChartActivity) ActivityStore.get("chart");
-        }else{
+        }
+        else {
             if(display) {
                 display = false;
                 chart.plot(lastData);
@@ -126,6 +173,8 @@ public class Engine extends AsyncTask {
         }
         //Log.d(TAG, "onProgressUpdate");
     }
+
+    enum State{IDLE,CONNECT, READ_DATA, DISPLAY}
 
 
 

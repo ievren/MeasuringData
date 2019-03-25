@@ -30,7 +30,6 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -76,7 +75,6 @@ public class DeviceListActivity extends Activity {
 
     List<BluetoothDevice> deviceList;
     private DeviceAdapter deviceAdapter;
-    private ServiceConnection onService = null;
     Map<String, Integer> devRssiValues;
     private static final long SCAN_PERIOD = 10000; //scanning for 10 seconds
     private Handler mHandler;

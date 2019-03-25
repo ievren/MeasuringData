@@ -1,6 +1,9 @@
 package ch.zhaw.android.measuringdata;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -8,11 +11,15 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.chart.ChartActivity;
 import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.UartActivity;
+import ch.zhaw.android.measuringdata.uart.UartService;
 
+import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -22,12 +29,18 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static final String TAG = "MeasuringApp";
+    private static final long DURATION = 2000;
     public static MainActivity obj;
 
-    Intent  chartIntent;
-    Intent  uartIntent;
-    Data    data;
-    Engine  engine;
+    Intent          chartIntent;
+    Intent          uartIntent;
+
+    Data            data;
+    Engine          engine;
+    UartService     btService; //Bluetooth Connection
+
+    boolean btserviceBound = false;
+    boolean connected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +68,20 @@ public class MainActivity extends AppCompatActivity {
         engine=new Engine();
         engine.setChart(null);
         engine.setData(data);
+        engine.setBtService(btService);
         engine.setRun(true);
         engine.execute();
         //engine.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 
 
         ActivityStore.put("main",this);
+
+        new Handler().postDelayed(() -> {
+            final Intent intent = new Intent(this, UartActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+            finish();
+        }, DURATION);
     }
 
     @Override

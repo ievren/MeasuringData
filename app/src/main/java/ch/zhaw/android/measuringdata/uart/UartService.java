@@ -56,6 +56,9 @@ public class UartService extends Service {
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
 
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
@@ -155,7 +158,7 @@ public class UartService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        UartService getService() {
+        public UartService getService() {
             return UartService.this;
         }
     }
@@ -174,7 +177,7 @@ public class UartService extends Service {
         return super.onUnbind(intent);
     }
 
-    private final IBinder mBinder = new LocalBinder();
+
 
     /**
      * Initializes a reference to the local Bluetooth adapter.
@@ -364,4 +367,12 @@ public class UartService extends Service {
 
         return mBluetoothGatt.getServices();
     }
+
+
+    /** method for clients */
+    public int checkConnectionEstablished() {
+        return mConnectionState;
+    }
+
+
 }
