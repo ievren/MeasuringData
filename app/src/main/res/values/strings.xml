@@ -1,0 +1,84 @@
+<resources>
+    <string name="app_name">MeasuringData</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_chart">TestChartActivity</string>
+
+    <!-- UART-->
+    <string name="device">Device:</string>
+    <string name="no_device">&lt;Select a device&gt;</string>
+    <string name="select_device">Select a device</string>
+    <string name="status">Status</string>
+    <string name="llsWrite">LinkLossAlert</string>
+    <string name="iasWrite">ImmediateAlert</string>
+    <string name="scanning">Scanning for devices...</string>
+    <string name="no_ble_devices">No LE devices found.</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Not connected</string>
+    <string name="ready">Ready</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connect">connect</string>
+    <string name="unpair">unpair</string>
+    <string name="pair">pair</string>
+    <string name="RadioButton1">Alert level high</string>
+    <string name="RadioButton2">Alert level mid</string>
+    <string name="RadioButton3">Stop alerting</string>
+    <string name="SystemId">SystemId</string>
+    <string name="ModelNumber">ModelNumber</string>
+    <string name="SerialNumber">SerialNumber</string>
+    <string name="FirmwareRevision">FirmwareRevision</string>
+    <string name="HardwareRevision">HardwareRevision</string>
+    <string name="SoftwareRevision">SoftwareRevision</string>
+    <string name="ManufactureName">ManufactureName</string>
+    <string name="RegCertDataList">RegCertDataList</string>
+    <string name="ManufactureId">    ManufactureId</string>
+    <string name="BatteryLevel">    Battery Level</string>
+    <string name="OrgId">    OrganizationId</string>
+    <string name="Txpower">    Txpower Level</string>
+    <string name="Noupdate">    No Update</string>
+    <string name="ReadTxPower">ReadTxPower</string>
+    <string name="high_alert">HIGH Alert triggered!</string>
+    <string name="low_alert">LOW Alert triggered!</string>
+    <string name="writeTxnoti">TxNoti</string>
+    <string name="readRssi">Read Rssi Value</string>
+    <string name="Readdummy">D Read</string>
+    <string name="removeBond">Remove Bond</string>
+    <string name="paired">paired</string>
+    <string name="popup_title">Quit nRF UART</string>
+    <string name="popup_message">Do you want to quit this Application?</string>
+    <string name="popup_yes">YES</string>
+    <string name="popup_no">NO</string>
+    <string name="ble_not_supported">Bluetooth Low Energy not supported</string>
+    <string name="scan">Scan</string>
+    <string name="cancel">Cancel</string>
+
+    <!--INFO -->
+    <string name="bluetooth_disabled_title">BLUETOOTH DISABLED</string>
+    <string name="bluetooth_disabled_info">The Bluetooth adapter is turned off. Click the button below to enable it.</string>
+    <string name="bluetooth_disabled_action">Enable</string>
+
+    <string name="location_permission_title">LOCATION PERMISSION REQUIRED</string>
+    <string name="location_permission_info">From Android 6.0 Marshmallow onwards the application requires Location permission in order to scan for Bluetooth Low Energy devices.
+      \n\nThis is because Bluetooth LE beacons, for example iBeacons or Eddystone, may be used to determine the phone\'s and user\'s location. <b>This Measurement System</b> will not use this information in any way.</string>
+    <string name="location_permission_action">Grant permission</string>
+    <string name="location_permission_settings">Settings</string>
+
+    <string name="not_supported_title">DEVICE NOT SUPPORTED</string>
+    <string name="not_supported_info">1. The Measurement Device service hasn\'t been found on the device\'s attribute table.
+		\n\n2. Is the Device turned on? </string>
+    <string name="not_supported_action">Fix and try again</string>
+
+
+    <string name="blinky_guide_title">CAN\'T SEE YOUR MEASUREMENT SYSTEM?</string>
+    <string name="blinky_guide_info">1. Make sure the Device is <b>turned on</b>
+        \n\n2. Make sure the <b>Device Bluetooth LED</b> is blinking.</string>
+    <string name="blinky_guide_location_info">3. Location is turned off. Some Android phones require it enabled in order to scan for Bluetooth LE devices.
+		If you are sure your Measurement Device is on and it doesn\'t show up here, click the button below to enable Location.</string>
+    <string name="blinky_guide_location_action">Enable</string>
+
+    <!--INFO END -->
+
+
+
+    <string name="title_activity_chart">ChartActivity</string>
+    <string name="action_uart">UART Activity</string>
+</resources>
