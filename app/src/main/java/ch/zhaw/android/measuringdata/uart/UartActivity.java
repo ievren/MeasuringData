@@ -209,7 +209,6 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                 finish();
             }
             else {
-            else {
                 btServiceBound = true;
 
                 Log.d(TAG,"btServiceBound: "+btServiceBound);
