@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         engine=new Engine(this);
         engine.setChart(null);
         engine.setData(data);
-        engine.setBtService(btService);
         engine.setRun(true);
         engine.execute();
         //engine.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");

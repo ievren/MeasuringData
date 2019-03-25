@@ -22,10 +22,12 @@ import ch.zhaw.android.measuringdata.chart.ChartActivity;
 import ch.zhaw.android.measuringdata.uart.UartActivity;
 import ch.zhaw.android.measuringdata.uart.UartService;
 
-enum State{IDLE,CONNECT, READ_DATA, DISPLAY}
+enum State{IDLE,CONNECT,CONNECTED, READ_DATA, DISPLAY}
 
 public class Engine extends AsyncTask {
 
+    private static final int UART_PROFILE_CONNECTED = 20;
+    private static final int UART_PROFILE_DISCONNECTED = 21;
     private static final long DURATION = 2000 ;
     private Context context;
 
@@ -33,7 +35,6 @@ public class Engine extends AsyncTask {
     ChartActivity   chart;;
     UartActivity    uart;
     Data            data;
-    UartService     btService; //Bluetooth Connection
     Intent          btBindIntent;
 
     boolean         display;
@@ -55,11 +56,6 @@ public class Engine extends AsyncTask {
         this.chart = chart;
     }
 
-    public void setBtService(UartService btService) {
-        this.btService = btService;
-
-
-    }
 
     public void setData(Data data) {
         this.data = data;
@@ -79,9 +75,6 @@ public class Engine extends AsyncTask {
             context.startActivity(intent);
             //finish();
         }, DURATION);
-        state=State.CONNECT;
-
-
     }
 
     @Override
@@ -118,19 +111,43 @@ public class Engine extends AsyncTask {
         }
 
 
+
+
         switch(state){
             case IDLE:
-                //state=State.CONNECT;
+                if(uart!=null){
+                    Log.v(TAG, "<----- State=CONNECT ---->");
+                    state=State.CONNECT;
+                }
                 break;
             case CONNECT:
                 //check if a BT-Connection has been made
                 btServiceBound = uart.checkBtServiceBound();
                 if(btServiceBound) {
-                    btServiceState = btService.checkConnectionEstablished();
+                    btServiceState = uart.checkConnectionEstablished();
+                    //Log.v(TAG, "btServiceState = "+btServiceState);
+                    if(btServiceState==UART_PROFILE_CONNECTED) {
+                        state = State.CONNECTED;
+                    }
                 }
-                if(btServiceState==2) {
-                    Log.v(TAG, "Connection established");
+                break;
+            case CONNECTED:
+                if(uart.checkConnectionEstablished()==UART_PROFILE_CONNECTED) {
                     //state= State.READ_DATA;
+                }
+                else {
+                    Log.v(TAG, "--Disconnected");
+                    int i=0;
+                    //Try Reconnect
+                    while(i <3) {
+                        Log.v(TAG, "--Try Reconnecting");
+                        uart.btnConnectDisconnect.performClick();
+                        if(uart.checkConnectionEstablished()==UART_PROFILE_CONNECTED){
+                            i=UART_PROFILE_CONNECTED;
+                        }
+                        i++;
+                    }
+                    state= State.CONNECT;
                 }
                 break;
             case READ_DATA:

@@ -58,6 +58,7 @@ import java.util.Date;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.R;
 
 import static android.app.PendingIntent.getActivity;
@@ -95,7 +96,6 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.v(TAG, "<----- onCreate ---->");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
@@ -383,8 +383,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     public void onStart() {
         super.onStart();
         bindBtService();
-
-
+        ActivityStore.put("uart",this);
     }
 
     @Override
@@ -523,5 +522,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                     .setNegativeButton(R.string.popup_no, null)
                     .show();
         }*/
+    }
+
+    public int checkConnectionEstablished (){
+        return mState;
     }
 }
