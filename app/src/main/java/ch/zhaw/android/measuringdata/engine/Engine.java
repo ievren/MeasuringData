@@ -14,6 +14,7 @@ import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.chart.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.uart.UartActivity;
+import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY}
 
@@ -63,13 +64,6 @@ public class Engine extends AsyncTask {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Log.d(TAG, "onPreExecute");
-        new Handler().postDelayed(() -> {
-            final Intent intent = new Intent(context, UartActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            context.startActivity(intent);
-            //finish();
-        }, DURATION);
     }
 
     @Override
@@ -126,6 +120,7 @@ public class Engine extends AsyncTask {
                 break;
             case CONNECTED:
                 if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
+                    delay=0;
                     state = State.READ_DATA;
                 } else {
                     Log.v(TAG, "--Disconnected");
@@ -143,10 +138,12 @@ public class Engine extends AsyncTask {
                 }
                 break;
             case READ_DATA:
-                if (data.isReady() && delay > 10) {
+                if (uart.isDataReady() && delay > 10) {
+                    data.setData(uart.getRecivedData());
                     lastData = data.getLastData();
                     delay = 0;
                     display = true;
+                    uart.setDataReady(false);
                     state = State.DISPLAY;
                 }
                 break;
@@ -173,7 +170,7 @@ public class Engine extends AsyncTask {
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
 
-        Log.d(TAG, "onPostExecute");
+        //Log.d(TAG, "onPostExecute");
 
 
     }
@@ -181,23 +178,16 @@ public class Engine extends AsyncTask {
     @Override
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
-        if (uart == null) {
-            uart = (UartActivity) ActivityStore.get("uart");
-        } else {
-            if (connect) {
-                connect = false;
-                //uart.btnConnectDisconnect.performClick();
-            }
 
-        }
-
-
-        if (chart == null) {
-            chart = (ChartActivity) ActivityStore.get("chart");
-        } else {
-            if (display) {
-                display = false;
-                chart.plot(lastData);
+        if(state==State.DISPLAY) {
+            if (chart == null) {
+                ActivityStore.get("main").startActivity(IntentStore.get("chart"));
+                chart = (ChartActivity) ActivityStore.get("chart");
+            } else {
+                if (display) {
+                    display = false;
+                    chart.plot(lastData);
+                }
             }
         }
 

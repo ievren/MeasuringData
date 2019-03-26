@@ -1,29 +1,23 @@
 package ch.zhaw.android.measuringdata;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.chart.ChartActivity;
+import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.engine.Engine;
+import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.uart.UartActivity;
-import ch.zhaw.android.measuringdata.uart.UartService;
-
-import android.os.Handler;
-import android.os.IBinder;
-import android.util.Log;
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
+import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,12 +25,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MeasuringApp";
     public static MainActivity obj;
 
-    Intent          chartIntent;
-    Intent          uartIntent;
+    Intent chartIntent;
+    Intent uartIntent;
+    UartActivity uart;
 
-    Data            data;
-    Engine          engine;
-    UartService     btService; //Bluetooth Connection
+    Data data;
+    Engine engine;
+    BtService btService; //Bluetooth Connection
 
     boolean btserviceBound = false;
     boolean connected;
@@ -52,27 +47,29 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Data seved to "+getPackageResourcePath()+"...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Data seved to " + getPackageResourcePath() + "...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
 
 
-
         chartIntent = new Intent(MainActivity.this, ChartActivity.class);
+        startActivity(chartIntent);
         uartIntent = new Intent(MainActivity.this, UartActivity.class);
         startActivity(uartIntent);
+        IntentStore.put("chart",chartIntent);
+        IntentStore.put("uart",uartIntent);
 
-        data=new Data();
-        engine=new Engine(this);
-        engine.setChart(null);
+        data = new Data();
+        engine = new Engine(this);
+        engine.setChart((ChartActivity) ActivityStore.get("chart"));
         engine.setData(data);
         engine.setRun(true);
         engine.execute();
         //engine.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 
 
-        ActivityStore.put("main",this);
+        ActivityStore.put("main", this);
 
 
     }
@@ -89,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_chart:
                 Log.d(String.valueOf(this), "Menu Item clicked->action CHART");
                 startActivity(chartIntent);

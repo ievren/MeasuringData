@@ -1,16 +1,21 @@
 package ch.zhaw.android.measuringdata.data;
 
+import android.util.Log;
+
 import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
 
 public class Data {
+
+    final static String TAG="Data";
     private enum Endian {LITTLE, BIG;}
 
     float count=1;
     //
     //-------------------------------------------|| ||
-    short rxData=0; //little Endian, '00 00'=0, '01 00'=1,  '02 00'=2,...
+    short[] rxData; //little Endian, '00 00'=0, '01 00'=1,  '02 00'=2,...
+    ArrayList<Entry> dataList=new ArrayList();
 
     public boolean isReady(){
         return true;
@@ -20,24 +25,36 @@ public class Data {
 
     }
 
-    /*public short createRxExampleData (int x){
-        short test[x]=0;
-        for (int i = 0; i < x; i=i+2) {
-            test[i]=0;
-            test[i+1]=i;
-        }
-        return test;
-    }*/
+    public void setData(byte[] data) {
+        String log="";
+        //int rxDataLen=(data.length-1)/2;
+        int rxDataLen=(data.length)/2;
+        rxData=new short[rxDataLen];
 
-    public ArrayList<Entry> getExampleData(byte rxData[]){
-        ArrayList<Entry> dataVals = new ArrayList();
-        for (int i = 0; i < rxData.length ; i++) {
-            dataVals.add(new Entry(i*20,rxData[i]));
-            getInt16Value(getByteAsList(rxData,0),0,Endian.LITTLE);
+        //first byte is package no
+        //for (int j = 1; j < data.length; j+=2) {
+        for (int j = 0; j < data.length; j+=2) {
+            //rxData[(j-1)/2]=(short)((data[j]<<8)+data[j+1]);
+            rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]);
+            log+=String.format("%d_%03d ",j,rxData[(j)/2]);
         }
-        return dataVals;
+        Log.d(TAG,"data:"+log);
     }
 
+    public ArrayList<Entry> getLastData() {
+        count+=.5;
+        if(count==10.0){
+            count=1;
+        }
+
+        ArrayList<Entry> list = new ArrayList<>();
+        for (int i = 0; i < rxData.length; i++) {
+            list.add(new Entry(i*100,count*rxData[i]));
+        }
+        return list;
+    }
+
+    /*
     public ArrayList<Entry> getLastData(){
         count+=.1;
         if(count==3.0){
@@ -70,30 +87,5 @@ public class Data {
         return dataVals;
 
     }
-
-    private int getInt16Value(ArrayList<Byte> bytes, int startByte, Endian endian) {
-        return (short) getByteValue(bytes, startByte, 2, endian);
-    }
-
-    private long getByteValue(ArrayList<Byte> bytes, int startByte, int byteSize, Endian endian) {
-        long value = 0;
-        for (int j = 0; j < byteSize; j++) {
-            if (endian == Endian.LITTLE) {
-                //Swap 2 Bytes(value)
-                value = value + ((long) (bytes.get(j + startByte)&0xFF) << (j * 8));
-            } else {
-                value = value + ((long) (bytes.get(j + startByte)&0xFF) << ((byteSize - 1 - j) * 8));
-            }
-        }
-        return value;
-    }
-
-    private ArrayList<Byte> getByteAsList(byte[] bytes, int startIndex) {
-        ArrayList<Byte> list = new ArrayList<>();
-        for (int i = startIndex; i < bytes.length; i++) {
-            list.add(bytes[i]);
-        }
-        return list;
-    }
-
+    */
 }

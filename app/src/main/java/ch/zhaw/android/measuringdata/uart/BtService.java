@@ -47,8 +47,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
-public class UartService extends Service {
-    private final static String TAG = UartService.class.getSimpleName();
+public class BtService extends Service {
+    private final static String TAG = BtService.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -158,8 +158,8 @@ public class UartService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        public UartService getService() {
-            return UartService.this;
+        public BtService getService() {
+            return BtService.this;
         }
     }
 
