@@ -1,50 +1,45 @@
 package ch.zhaw.android.measuringdata.engine;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
 
-
-import androidx.appcompat.app.AppCompatActivity;
 import ch.zhaw.android.measuringdata.ActivityStore;
-import ch.zhaw.android.measuringdata.MainActivity;
-import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.chart.ChartActivity;
+import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.uart.UartActivity;
-import ch.zhaw.android.measuringdata.uart.UartService;
 
-enum State{IDLE,CONNECT,CONNECTED, READ_DATA, DISPLAY}
+enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY}
 
 public class Engine extends AsyncTask {
 
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
-    private static final long DURATION = 2000 ;
+    private static final long DURATION = 2000;
     private Context context;
 
-    static String TAG="Engine";
-    ChartActivity   chart;;
-    UartActivity    uart;
-    Data            data;
-    Intent          btBindIntent;
+    static String TAG = "Engine";
+    ChartActivity chart;
+    ;
+    UartActivity uart;
+    Data data;
+    Intent btBindIntent;
 
-    boolean         display;
-    boolean         connect;
-    boolean         btServiceBound=false;
-    int             btServiceState=0;  //0=Disconnected, 1=Connecting, 2=Connected
-    boolean             loop=true;
-    boolean             run=false;
-    State               state=State.IDLE;
-    ArrayList<Entry>    lastData;
+    boolean display;
+    boolean connect;
+    boolean btServiceBound = false;
+    int btServiceState = 0;  //0=Disconnected, 1=Connecting, 2=Connected
+    boolean loop = true;
+    boolean run = false;
+    State state = State.IDLE;
+    State oldState;
+    ArrayList<Entry> lastData;
     int delay;
 
 
@@ -79,8 +74,8 @@ public class Engine extends AsyncTask {
 
     @Override
     protected Integer doInBackground(Object[] objects) {
-        while(loop) {
-            if(run) {
+        while (loop) {
+            if (run) {
                 process();
             }
             try {
@@ -92,85 +87,86 @@ public class Engine extends AsyncTask {
         return 0;
     }
 
-    private void process(){
+    private void process() {
         delay++;
 
-        if(chart==null){
-            chart= (ChartActivity) ActivityStore.get("chart");
-        }else{
-            if(chart!=(ChartActivity) ActivityStore.get("chart")){
-                chart=(ChartActivity) ActivityStore.get("chart");
+        if (chart == null) {
+            chart = (ChartActivity) ActivityStore.get("chart");
+        } else {
+            if (chart != (ChartActivity) ActivityStore.get("chart")) {
+                chart = (ChartActivity) ActivityStore.get("chart");
             }
         }
-        if(uart==null){
-            uart= (UartActivity) ActivityStore.get("uart");
-        }else{
-            if(uart!=(UartActivity) ActivityStore.get("uart")){
-                uart=(UartActivity) ActivityStore.get("uart");
+        if (uart == null) {
+            uart = (UartActivity) ActivityStore.get("uart");
+        } else {
+            if (uart != (UartActivity) ActivityStore.get("uart")) {
+                uart = (UartActivity) ActivityStore.get("uart");
             }
         }
 
 
-
-
-        switch(state){
+        switch (state) {
             case IDLE:
-                if(uart!=null){
+                if (uart != null) {
                     Log.v(TAG, "<----- State=CONNECT ---->");
-                    state=State.CONNECT;
+                    state = State.CONNECT;
                 }
                 break;
             case CONNECT:
                 //check if a BT-Connection has been made
                 btServiceBound = uart.checkBtServiceBound();
-                if(btServiceBound) {
+                if (btServiceBound) {
                     btServiceState = uart.checkConnectionEstablished();
                     //Log.v(TAG, "btServiceState = "+btServiceState);
-                    if(btServiceState==UART_PROFILE_CONNECTED) {
+                    if (btServiceState == UART_PROFILE_CONNECTED) {
                         state = State.CONNECTED;
                     }
                 }
                 break;
             case CONNECTED:
-                if(uart.checkConnectionEstablished()==UART_PROFILE_CONNECTED) {
-                    //state= State.READ_DATA;
-                }
-                else {
+                if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
+                    state = State.READ_DATA;
+                } else {
                     Log.v(TAG, "--Disconnected");
-                    int i=0;
+                    int i = 0;
                     //Try Reconnect
-                    while(i <3) {
+                    while (i < 3) {
                         Log.v(TAG, "--Try Reconnecting");
-                        uart.btnConnectDisconnect.performClick();
-                        if(uart.checkConnectionEstablished()==UART_PROFILE_CONNECTED){
-                            i=UART_PROFILE_CONNECTED;
+                        uart.connectDisconnect();
+                        if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
+                            i = UART_PROFILE_CONNECTED;
                         }
                         i++;
                     }
-                    state= State.CONNECT;
+                    state = State.CONNECT;
                 }
                 break;
             case READ_DATA:
-                if(data.isReady() && delay>10){
-                    lastData=data.getLastData();
-                    delay=0;
-                    display=true;
-                    state=State.DISPLAY;
+                if (data.isReady() && delay > 10) {
+                    lastData = data.getLastData();
+                    delay = 0;
+                    display = true;
+                    state = State.DISPLAY;
                 }
                 break;
             case DISPLAY:
-                if(delay>20) {
-                    delay=0;
+                if (delay > 20) {
+                    delay = 0;
                     data.startRead();
-                    state = State.READ_DATA;
+                    state = State.CONNECTED;
                 }
                 break;
 
         }
         publishProgress("");
+        if (state != oldState) {
+            Log.v(TAG, "state:" + state);
+            oldState = state;
+
+        }
 
     }
-
 
 
     @Override
@@ -185,11 +181,10 @@ public class Engine extends AsyncTask {
     @Override
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
-        if(uart==null){
+        if (uart == null) {
             uart = (UartActivity) ActivityStore.get("uart");
-        }
-        else {
-            if(connect){
+        } else {
+            if (connect) {
                 connect = false;
                 //uart.btnConnectDisconnect.performClick();
             }
@@ -197,11 +192,10 @@ public class Engine extends AsyncTask {
         }
 
 
-        if(chart==null) {
+        if (chart == null) {
             chart = (ChartActivity) ActivityStore.get("chart");
-        }
-        else {
-            if(display) {
+        } else {
+            if (display) {
                 display = false;
                 chart.plot(lastData);
             }

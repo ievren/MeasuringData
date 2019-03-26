@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         chartIntent = new Intent(MainActivity.this, ChartActivity.class);
         uartIntent = new Intent(MainActivity.this, UartActivity.class);
-
+        startActivity(uartIntent);
 
         data=new Data();
         engine=new Engine(this);

@@ -189,10 +189,10 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
         // load saved DEVICE Adress: -> String saved_device
         loadData();
+        bindBtService();
+        ActivityStore.put("uart",this);
 
-        //perform a Click
-        btnConnectDisconnect.performClick();
-
+        finish();
     }
 
 
@@ -222,15 +222,6 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             //mService.disconnect(mDevice);
             mService = null;
             btServiceBound =false;
-        }
-    };
-
-    private Handler mHandler = new Handler() {
-        @Override
-
-        //Handler events that received from UART service 
-        public void handleMessage(Message msg) {
-
         }
     };
 
@@ -382,15 +373,14 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     @Override
     public void onStart() {
         super.onStart();
-        bindBtService();
-        ActivityStore.put("uart",this);
+        //bindBtService();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy()");
-
+        /*
         try {
                 //Stop already unbind Service
 //            unbindService(mServiceConnection);
@@ -401,7 +391,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         } catch (Exception ignore) {
             Log.e(TAG, ignore.toString());
         }
-
+        */
 
     }
 
@@ -409,8 +399,8 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     protected void onStop() {
         Log.d(TAG, "onStop");
         super.onStop();
-        unbindService(mServiceConnection);
-        btServiceBound = false;
+        //unbindService(mServiceConnection);
+        //btServiceBound = false;
     }
 
     @Override
@@ -526,5 +516,34 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     public int checkConnectionEstablished (){
         return mState;
+    }
+
+    public void connectDisconnect (){
+        //Check Permissions
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) permissonContext, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            Log.i(TAG, "UART Activity started: Asked for permission");
+            return;
+        }
+        if (!mBtAdapter.isEnabled()) {
+            Log.i(TAG, "onClick - BT not enabled yet");
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        }
+        else {
+            if (btnConnectDisconnect.getText().equals("Connect")){
+                if(mState !=UART_PROFILE_CONNECTED){
+                    Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
+                    startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+                }
+            } else {
+                //Disconnect button pressed
+                if (mDevice!=null)
+                {
+                    mService.disconnect();
+                }
+            }
+        }
     }
 }
