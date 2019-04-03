@@ -21,7 +21,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.android.measuringdata.uart;
+package ch.zhaw.android.measuringdata.ui;
 
 
 import android.Manifest;
@@ -58,6 +58,8 @@ import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.R;
+import ch.zhaw.android.measuringdata.uart.BtService;
+import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
 
 import static android.app.PendingIntent.getActivity;
 

@@ -1,4 +1,4 @@
-package ch.zhaw.android.measuringdata.chart;
+package ch.zhaw.android.measuringdata.ui;
 
 import android.content.Intent;
 import android.os.AsyncTask;

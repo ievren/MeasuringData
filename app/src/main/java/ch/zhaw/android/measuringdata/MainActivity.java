@@ -12,11 +12,11 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import ch.zhaw.android.measuringdata.chart.ChartActivity;
+import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
-import ch.zhaw.android.measuringdata.uart.UartActivity;
+import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,14 +27,11 @@ public class MainActivity extends AppCompatActivity {
 
     Intent chartIntent;
     Intent uartIntent;
-    UartActivity uart;
 
     Data data;
     Engine engine;
     BtService btService; //Bluetooth Connection
 
-    boolean btserviceBound = false;
-    boolean connected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -9,12 +9,11 @@ import java.util.ArrayList;
 public class Data {
 
     final static String TAG="Data";
-    private enum Endian {LITTLE, BIG;}
+    final static int TOTALPACKAGES=3;
 
     float count=1;
     //
-    //-------------------------------------------|| ||
-    short[] rxData; //little Endian, '00 00'=0, '01 00'=1,  '02 00'=2,...
+    short[][] rxData;
     ArrayList<Entry> dataList=new ArrayList();
 
     public boolean isReady(){
@@ -25,31 +24,38 @@ public class Data {
 
     }
 
-    public void setData(byte[] data) {
+    public void setData(byte[] data, int packageNr) {
         String log="";
         //int rxDataLen=(data.length-1)/2;
         int rxDataLen=(data.length)/2;
-        rxData=new short[rxDataLen];
+        rxData=new short[TOTALPACKAGES][rxDataLen];
 
-        //first byte is package no
+        //first byte is package no "NOT Implemented"
         //for (int j = 1; j < data.length; j+=2) {
         for (int j = 0; j < data.length; j+=2) {
             //rxData[(j-1)/2]=(short)((data[j]<<8)+data[j+1]);
-            rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]);
-            log+=String.format("%d_%03d ",j,rxData[(j)/2]);
+            // rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]); //no shift necessary
+            rxData[packageNr][(j)/2] = (short) ((data[j]<<8)+data[j+1]);
+
+            log += String.format("[%d, %d]=%03d ", packageNr,j, rxData[(packageNr)][(j)/2]);
         }
-        Log.d(TAG,"data:"+log);
+        Log.d(TAG, "data:" + log);
+
+
     }
 
     public ArrayList<Entry> getLastData() {
-        count+=.5;
+        // Manipulate arriving text with count
+        /*count+=.5;
         if(count==10.0){
             count=1;
-        }
+        }*/
 
         ArrayList<Entry> list = new ArrayList<>();
-        for (int i = 0; i < rxData.length; i++) {
-            list.add(new Entry(i*100,count*rxData[i]));
+        for (int i = 0; i < TOTALPACKAGES ; i++) {
+            for (int j = 0; j < rxData[i].length; j++) {
+                list.add(new Entry(j * 100, rxData[i][j])); //count * rxData[i][j]));
+            }
         }
         return list;
     }

@@ -3,7 +3,6 @@ package ch.zhaw.android.measuringdata.engine;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.util.Log;
 
 import com.github.mikephil.charting.data.Entry;
@@ -11,9 +10,9 @@ import com.github.mikephil.charting.data.Entry;
 import java.util.ArrayList;
 
 import ch.zhaw.android.measuringdata.ActivityStore;
-import ch.zhaw.android.measuringdata.chart.ChartActivity;
+import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
-import ch.zhaw.android.measuringdata.uart.UartActivity;
+import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY}
@@ -26,6 +25,7 @@ public class Engine extends AsyncTask {
     private Context context;
 
     static String TAG = "Engine";
+    final static int TOTALPACKAGES=3;
     ChartActivity chart;
     ;
     UartActivity uart;
@@ -139,12 +139,15 @@ public class Engine extends AsyncTask {
                 break;
             case READ_DATA:
                 if (uart.isDataReady() && delay > 10) {
-                    data.setData(uart.getRecivedData());
-                    lastData = data.getLastData();
-                    delay = 0;
-                    display = true;
+                    for (int i = 0; i < TOTALPACKAGES; i++) {
+                        data.setData(uart.getRecivedData(),i);
+                        delay = 0;
+                    }
                     uart.setDataReady(false);
-                    state = State.DISPLAY;
+                    lastData = data.getLastData();
+                    //FIXME receiving Data?
+                    //display = true;
+                    //state = State.DISPLAY;
                 }
                 break;
             case DISPLAY:

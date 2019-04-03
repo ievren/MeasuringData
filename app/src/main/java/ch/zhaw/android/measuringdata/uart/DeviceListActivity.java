@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,6 +37,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -54,23 +56,30 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import butterknife.OnClick;
 import ch.zhaw.android.measuringdata.R;
+import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
+import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.utils.Utils;
+import no.nordicsemi.android.support.v18.scanner.ScanCallback;
+import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 
 /**
  * Class for Connecting Bluetooth LE into the connected mode. It scans the LE Enviroment and lists all the devices.
  */
 public class DeviceListActivity extends Activity {
+    final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
     private BluetoothAdapter mBluetoothAdapter;
 
-    // private BluetoothAdapter mBtAdapter;
+    // private BluetoothAdapter mBtAdapter
     private TextView mEmptyList;
     public static final String TAG = "DeviceListActivity";
 
@@ -83,6 +92,7 @@ public class DeviceListActivity extends Activity {
 
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String DEVICE = "saved_device";
+    private static final ParcelUuid FILTER_UUID = new ParcelUuid(BtService.UART_SERVICE_UUID);
     String autoConnectDevice = "";
 
     @Override
@@ -155,49 +165,86 @@ public class DeviceListActivity extends Activity {
                 @Override
                 public void run() {
                     mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    //mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     cancelButton.setText(R.string.scan);
                 }
             }, SCAN_PERIOD);
             mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            scanner.startScan(mLeScanCallback);
+            //TODO TEST with Filter
+            //mBluetoothAdapter.startLeScan(mLeScanCallback);
+
 
             cancelButton.setText(R.string.cancel);
         } else {
             mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            scanner.stopScan(mLeScanCallback);
+            //mBluetoothAdapter.stopLeScan(mLeScanCallback);
             cancelButton.setText(R.string.scan);
         }
 
     }
 
 
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
+    /* Discovered Device */
+    private ScanCallback mLeScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, @NonNull no.nordicsemi.android.support.v18.scanner.ScanResult result) {
+            runOnUiThread(new Runnable() {
+                              @Override
+                              public void run() {
+
+                                  //Filter Devices before adding
+                                  //Check UUID is UART so we can add to the List
+                                  final ScanRecord record = result.getScanRecord();
+                                  if (record == null) {
+                                      Log.d(TAG,"ParcelUIIDS: null");
+                                      return;
+                                  }
+                                  final List<ParcelUuid> uuids = record.getServiceUuids();
+                                  if (uuids == null) {
+                                      return;
+                                  }
+                                  if ( uuids.contains(FILTER_UUID) ) {
+                                      Log.d(TAG,"ParcelUIIDS:"+uuids.contains(FILTER_UUID)+" Device: "+result.getDevice().getName());
+                                      addDevice(result.getDevice(), result.getRssi());
+                                  }
+
+                                  if (result.getDevice().getAddress().equals(autoConnectDevice)) {
+                                      Log.d(TAG,"Device already saved");
+                                      //TODO Device is the Device from last time
+
+                                      mScanning = false;
+                                      scanner.stopScan(mLeScanCallback);
+                                      Bundle b = new Bundle();
+                                      b.putString(BluetoothDevice.EXTRA_DEVICE, autoConnectDevice);
+
+                                      Intent result = new Intent();
+                                      result.putExtras(b);
+                                      setResult(Activity.RESULT_OK, result);
+                                      finish();
+
+
+                                  }
+                              }
+            });
+        }
+    };
+        /*
+        @Override
+
+                //public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
+                public void onLeScan(final BluetoothDevice device, final int rssi, @NonNull final ScanResult result) {
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (device.getAddress().equals(autoConnectDevice)) {
-                                //TODO Device is the Device from last time
-                                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                                Bundle b = new Bundle();
-                                b.putString(BluetoothDevice.EXTRA_DEVICE, autoConnectDevice);
-
-                                Intent result = new Intent();
-                                result.putExtras(b);
-                                setResult(Activity.RESULT_OK, result);
-                                finish();
-
-                            }
-                            else {
-                                addDevice(device, rssi);
-                            }
+                            addDevice(device,rssi);
                         }
                     });
                 }
             };
+     */
 
     private void addDevice(BluetoothDevice device, int rssi) {
         boolean deviceFound = false;
@@ -232,14 +279,17 @@ public class DeviceListActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
-        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        scanner.stopScan(mLeScanCallback);
+        //TODO Cleanup
+        //mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        scanner.stopScan(mLeScanCallback);
+        //mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
     }
 
@@ -247,7 +297,8 @@ public class DeviceListActivity extends Activity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             BluetoothDevice device = deviceList.get(position);
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            scanner.stopScan(mLeScanCallback);
+            //mBluetoothAdapter.stopLeScan(mLeScanCallback);
 
             Bundle b = new Bundle();
             b.putString(BluetoothDevice.EXTRA_DEVICE, deviceList.get(position).getAddress());

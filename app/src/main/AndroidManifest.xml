@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".chart.ChartActivity"
+            android:name=".ui.ChartActivity"
             android:label="@string/title_activity_chart"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -37,7 +37,7 @@
         </activity>
 
         <activity
-            android:name=".uart.UartActivity"
+            android:name=".ui.UartActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden"
             android:configChanges="keyboardHidden|orientation|screenSize">
