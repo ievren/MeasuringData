@@ -53,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.Date;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -77,6 +78,10 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String DEVICE = "saved_device";
+    public static int DATALENGTH=244;
+    public static int TOTALPACKAGES=3;
+
+
 
     TextView mRemoteRssiVal;
     RadioGroup mRg;
@@ -94,7 +99,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private String saved_device;
 
     private boolean isDataReady;
-    private byte[] rxValue;
+    private int packagecount=0;
+    private byte[] rxValue;     //
+    private byte[][] receivedData;   // [packagecount][received Data]
 
 
     @Override
@@ -116,6 +123,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         btnConnectDisconnect=(Button) findViewById(R.id.btn_select);
         btnSend=(Button) findViewById(R.id.sendButton);
         edtMessage = (EditText) findViewById(R.id.sendText);
+
+        receivedData= new byte[TOTALPACKAGES][DATALENGTH];   // [packagecount][received Data]
+
         //service_init(); //not bounded -> FIXME put it to a bounded section
         Log.d(TAG, "onServiceConnected mService= " + mService);
 
@@ -206,8 +216,14 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         isDataReady=val;
     }
 
-    public byte[] getRecivedData(){
-        return rxValue;
+    @NonNull
+    public byte[][] getRecivedData(){
+        return receivedData;
+    }
+
+    @NonNull
+    public int getRecivedPackageNr(){
+        return packagecount;
     }
 
 
@@ -289,8 +305,15 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             }
             //*********************//
             if (action.equals(BtService.ACTION_DATA_AVAILABLE)) {
+                if (packagecount==TOTALPACKAGES){
+                    packagecount=0;
+                }
 
                 rxValue = intent.getByteArrayExtra(BtService.EXTRA_DATA);
+
+
+
+                packagecount++;
                 runOnUiThread(new Runnable() {
                     public void run() {
                         try {
@@ -307,9 +330,11 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                             for(int i = 0; i < rxValue.length; i++ ){
                                 sb.append(String.format("%02X ", rxValue[i]));
                             }
-                            Log.d(TAG,"receivedData:"+sb);
+                            Log.d(TAG,"receivedDataLength:"+rxValue.length+"receivedData:"+sb);
+                            Log.d(TAG,"packecount:"+packagecount);
 
-                            isDataReady=true;
+
+
 //                             int i=0;
 //                             while(rxValue[i] != '\n')
 //                             {
@@ -317,8 +342,15 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 //                                 i++;
 //                             }
                             String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                            listAdapter.add("["+currentDateTimeString+"] RX: "+sb.toString());
+                            listAdapter.add("["+currentDateTimeString+"] Pckg:"+packagecount+"RX: "+sb.toString());
                             messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+
+
+                            // Store the Data
+                            receivedData[packagecount-1] = rxValue;
+                            if(packagecount==TOTALPACKAGES) {
+                                isDataReady = true;
+                            }
 
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());

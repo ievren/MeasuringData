@@ -25,7 +25,6 @@ public class Engine extends AsyncTask {
     private Context context;
 
     static String TAG = "Engine";
-    final static int TOTALPACKAGES=3;
     ChartActivity chart;
     ;
     UartActivity uart;
@@ -120,7 +119,7 @@ public class Engine extends AsyncTask {
                 break;
             case CONNECTED:
                 if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
-                    delay=0;
+                    delay = 0;
                     state = State.READ_DATA;
                 } else {
                     Log.v(TAG, "--Disconnected");
@@ -138,17 +137,17 @@ public class Engine extends AsyncTask {
                 }
                 break;
             case READ_DATA:
-                if (uart.isDataReady() && delay > 10) {
-                    for (int i = 0; i < TOTALPACKAGES; i++) {
-                        data.setData(uart.getRecivedData(),i);
-                        delay = 0;
-                    }
+                if (uart.isDataReady()) {
+
+                    data.setData(uart.getRecivedData());
                     uart.setDataReady(false);
-                    lastData = data.getLastData();
+                    //lastData = data.getLastData();
                     //FIXME receiving Data?
                     //display = true;
                     //state = State.DISPLAY;
                 }
+
+
                 break;
             case DISPLAY:
                 if (delay > 20) {
