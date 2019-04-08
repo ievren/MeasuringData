@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     Data data;
     Engine engine;
-    BtService btService; //Bluetooth Connection
+    // BtService btService; //Bluetooth Connection initialized by UARTActivity
 
 
     @Override

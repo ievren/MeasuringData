@@ -305,18 +305,12 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             }
             //*********************//
             if (action.equals(BtService.ACTION_DATA_AVAILABLE)) {
-                if (packagecount==TOTALPACKAGES){
-                    packagecount=0;
-                }
-
                 rxValue = intent.getByteArrayExtra(BtService.EXTRA_DATA);
-
-
-
                 packagecount++;
                 runOnUiThread(new Runnable() {
                     public void run() {
                         try {
+                            //TODO Try to get 5 packets -> and save in receivedData[0-4]
                             //String text = new String(rxValue, "UTF-8");
                             //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                             // 	listAdapter.add("["+currentDateTimeString+"] RX: "+text);
@@ -349,6 +343,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                             // Store the Data
                             receivedData[packagecount-1] = rxValue;
                             if(packagecount==TOTALPACKAGES) {
+                                packagecount=0;
                                 isDataReady = true;
                             }
 

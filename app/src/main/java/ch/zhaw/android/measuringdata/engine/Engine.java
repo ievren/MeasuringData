@@ -137,22 +137,19 @@ public class Engine extends AsyncTask {
                 }
                 break;
             case READ_DATA:
-                if (uart.isDataReady()) {
-
+                if (uart.isDataReady() && delay > 10) {
                     data.setData(uart.getRecivedData());
-                    uart.setDataReady(false);
-                    //lastData = data.getLastData();
+                    lastData = data.getLastData();
                     //FIXME receiving Data?
-                    //display = true;
-                    //state = State.DISPLAY;
+                    display = true;
+                    uart.setDataReady(false);
+                    state = State.DISPLAY;
                 }
-
-
                 break;
             case DISPLAY:
+                // see onProgressUpdate
                 if (delay > 20) {
                     delay = 0;
-                    data.startRead();
                     state = State.CONNECTED;
                 }
                 break;

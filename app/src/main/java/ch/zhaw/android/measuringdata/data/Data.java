@@ -12,6 +12,7 @@ public class Data {
 
     final static String TAG="Data";
     final static int TOTALPACKAGES=3;
+    final static int FREQUENCE_S = 20; //Abtastrate 50 Hz -> 20ms
 
     float count=1;
     //
@@ -22,9 +23,6 @@ public class Data {
         return true;
     }
 
-    public void startRead(){
-
-    }
 
     /**
      * data is a 2D array and contains [packageNR] [rxValue]
@@ -39,7 +37,7 @@ public class Data {
         int rxDataLen=(data[0].length)/2;
         rxData=new short[TOTALPACKAGES][rxDataLen];
 
-        //TODO first byte is package NR "NOT Implemented"
+        //TODO first byte is package Number "NOT Implemented"
         //for (int j = 1; j < data.length; j+=2) {
         for (int i = 0; i < packagenrs; i++) {
             for (int j = 0; j < data[0].length; j += 2) {
@@ -47,7 +45,7 @@ public class Data {
                 // rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]); //no shift necessary
                 rxData[i][(j) / 2] = (short) ((data[i][j] << 8) + data[i][j + 1]);
 
-                log += String.format("[%d, %d]=%03d ", i, j, rxData[(i)][(j) / 2]);
+                log += String.format("[%d, %d]=%d ", i, j, rxData[(i)][(j) / 2] & 0xFF); // rxdata & 0xFF -> unsigned
             }
         }
         Log.d(TAG, "data:" + log);
@@ -66,7 +64,8 @@ public class Data {
         ArrayList<Entry> list = new ArrayList<>();
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-                list.add(new Entry(j * 100, rxData[i][j])); //count * rxData[i][j]));
+
+                list.add(new Entry(j * FREQUENCE_S, rxData[i][j] & 0xFF)); //count * rxData[i][j]));
             }
         }
         return list;
