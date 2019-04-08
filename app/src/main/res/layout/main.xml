@@ -4,6 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
+
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
@@ -17,7 +18,7 @@
             android:padding="12dp"
             android:text="Connect" />
     </LinearLayout>
-
+    <include layout="@layout/content_main" />
     <LinearLayout
         android:id="@+id/linearLayout3"
         android:layout_width="match_parent"

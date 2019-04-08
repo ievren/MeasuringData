@@ -1,5 +1,6 @@
 package ch.zhaw.android.measuringdata;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     Intent chartIntent;
     Intent uartIntent;
+    Intent mainIntent;
 
     Data data;
     Engine engine;
@@ -54,8 +56,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(chartIntent);
         uartIntent = new Intent(MainActivity.this, UartActivity.class);
         startActivity(uartIntent);
+        mainIntent = new Intent(MainActivity.this, MainActivity.class);
+        IntentStore.put("main",mainIntent);
         IntentStore.put("chart",chartIntent);
         IntentStore.put("uart",uartIntent);
+        IntentStore.get("main");
+
 
         data = new Data();
         engine = new Engine(this);

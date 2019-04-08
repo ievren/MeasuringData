@@ -77,7 +77,8 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private static final int STATE_OFF = 10;
 
     public static final String SHARED_PREFS = "sharedPrefs";
-    public static final String DEVICE = "saved_device";
+    public static final String DEVICE = "saved_device_address";
+    public static final String DEVICE_Name = "saved_device_name";
     public static int DATALENGTH=244;
     public static int TOTALPACKAGES=3;
 
@@ -96,7 +97,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private Button btnSend;
     private EditText edtMessage;
     private Context permissonContext;
-    private String saved_device;
+    private static String saved_device;
 
     private boolean isDataReady;
     private int packagecount=0;
@@ -201,7 +202,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         });
 
         // load saved DEVICE Adress: -> String saved_device
-        loadData();
+        loadDevice();
         bindBtService();
 
         connectDisconnect();
@@ -285,6 +286,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_DISCONNECT_MSG");
+                        setDataReady(false);
                         btnConnectDisconnect.setText("Connect");
                         edtMessage.setEnabled(false);
                         btnSend.setEnabled(false);
@@ -388,19 +390,26 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     }
 
-    private void saveData(String deviceAddress) {
+    private void saveDevice(String deviceAddress) {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putString(DEVICE, deviceAddress);
+        editor.putString(DEVICE_Name, mDevice.getName());
         editor.apply();
-        Toast.makeText(this, "Device saved", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, mDevice.getName()+" saved", Toast.LENGTH_SHORT).show();
     }
 
-    public void loadData() {
+    public void loadDevice() {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         saved_device = sharedPreferences.getString(DEVICE, "");
         Log.d(TAG, "Stored Device is: "+ saved_device);
+    }
+
+    public final String getSavedDevice(){
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String saved_device_name = sharedPreferences.getString(DEVICE_Name, "");
+        return saved_device_name;
     }
 
 
@@ -496,7 +505,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                     ((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
                     if(btServiceBound) {
 
-                        saveData(deviceAddress);
+                        saveDevice(deviceAddress);
                         mService.connect(deviceAddress);
                     }
                     else {

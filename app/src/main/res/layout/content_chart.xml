@@ -8,6 +8,16 @@
     tools:context=".ui.ChartActivity"
     tools:showIn="@layout/activity_chart">
 
+
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:scaleType="centerCrop"
+        android:background="@color/design_default_color_secondary"
+        app:srcCompat="@drawable/new_ee_logo"/>
+
     <view
         android:id="@+id/line_chart"
         class="com.github.mikephil.charting.charts.LineChart"
@@ -15,6 +25,7 @@
         android:layout_height="217dp"
         android:layout_marginTop="8dp"
         android:padding="@dimen/activity_horizontal_margin"
+        android:background="#E6fefbf7"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

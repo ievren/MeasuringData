@@ -16,7 +16,7 @@ public class Data {
 
     float count=1;
     //
-    short[][] rxData;
+    int[][] rxData;
     ArrayList<Entry> dataList=new ArrayList();
 
     public boolean isReady(){
@@ -34,40 +34,57 @@ public class Data {
         int packagenrs = data.length-1;
         String log="";
         //int rxDataLen=(data.length-1)/2;
-        int rxDataLen=(data[0].length)/2;
-        rxData=new short[TOTALPACKAGES][rxDataLen];
+        int rxDataLen=((data[0].length)/2);
+        rxData=new int[TOTALPACKAGES][rxDataLen];
 
         //TODO first byte is package Number "NOT Implemented"
         //for (int j = 1; j < data.length; j+=2) {
-        for (int i = 0; i < packagenrs; i++) {
+        for (int i = 0; i <= packagenrs; i++) {
             for (int j = 0; j < data[0].length; j += 2) {
                 //rxData[(j-1)/2]=(short)((data[j]<<8)+data[j+1]);
-                // rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]); //no shift necessary
-                rxData[i][(j) / 2] = (short) ((data[i][j] << 8) + data[i][j + 1]);
-
-                log += String.format("[%d, %d]=%d ", i, j, rxData[(i)][(j) / 2] & 0xFF); // rxdata & 0xFF -> unsigned
+                // rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]);
+                // no shift necessary
+                //rxData[i][(j) / 2] = ( ((data[i][j] << 8) + data[i][j + 1]) & 0xFF);
+                //rxData[i][(j) / 2] =   ((data[i][j]<<8) + data[i][j + 1]);
+                int a = (short) (data[i][j]<<8 );
+                int b = (byte) (data[i][j + 1] );
+                int c = 0;
+                if(a> 255){
+                    c = (a+b);
+                }
+                else {
+                    c = (a+b) &0xff;
+                }
+                rxData[i][(j) / 2] = c;
+                log += String.format("[%d, %d]=%d ", i, j,  rxData[(i)][(j) / 2]); // rxdata & 0xFFFF -> unsigned
             }
+            Log.d(TAG, "data:" + log);
+            log = "";
         }
-        Log.d(TAG, "data:" + log);
+
 
 
 
     }
 
     public ArrayList<Entry> getLastData() {
+
+
         // Manipulate arriving text with count
-        /*count+=.5;
-        if(count==10.0){
+        count+=0.1;
+        if(count>=2){
             count=1;
-        }*/
+        }
 
         ArrayList<Entry> list = new ArrayList<>();
+        int a= 1;
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-
-                list.add(new Entry(j * FREQUENCE_S, rxData[i][j] & 0xFF)); //count * rxData[i][j]));
+                list.add(new Entry((a) * FREQUENCE_S/100, count* (rxData[i][j])) ); //count * rxData[i][j]));
+                a++;
             }
         }
+        a=0;
         return list;
     }
 

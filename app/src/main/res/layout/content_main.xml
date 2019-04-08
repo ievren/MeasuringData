@@ -22,7 +22,7 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:scaleType="centerCrop"
-        android:background="@color/design_default_color_secondary_variant"
+        android:background="@color/design_default_color_secondary"
         app:srcCompat="@drawable/new_ee_logo"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

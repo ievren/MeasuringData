@@ -66,5 +66,5 @@ dependencies {
     // implementation project(":ble")
 
     //Graph - Chart library "MP Android", OpenSource
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0-alpha'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

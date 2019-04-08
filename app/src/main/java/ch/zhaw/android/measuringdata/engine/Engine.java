@@ -2,6 +2,7 @@ package ch.zhaw.android.measuringdata.engine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -10,6 +11,8 @@ import com.github.mikephil.charting.data.Entry;
 import java.util.ArrayList;
 
 import ch.zhaw.android.measuringdata.ActivityStore;
+import ch.zhaw.android.measuringdata.uart.BtService;
+import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
@@ -22,11 +25,13 @@ public class Engine extends AsyncTask {
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
     private static final long DURATION = 2000;
+    public static String DEVICE_NAME ="device";
     private Context context;
 
     static String TAG = "Engine";
+
+
     ChartActivity chart;
-    ;
     UartActivity uart;
     Data data;
     Intent btBindIntent;
@@ -120,6 +125,8 @@ public class Engine extends AsyncTask {
             case CONNECTED:
                 if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     delay = 0;
+                    DEVICE_NAME = (String) uart.getSavedDevice();
+                    Log.d(TAG,"Device_Name="+DEVICE_NAME);
                     state = State.READ_DATA;
                 } else {
                     Log.v(TAG, "--Disconnected");
@@ -137,13 +144,15 @@ public class Engine extends AsyncTask {
                 }
                 break;
             case READ_DATA:
-                if (uart.isDataReady() && delay > 10) {
+                display = true;
+                if (uart.isDataReady() && delay > 10 ) {
+                    delay = 0;
                     data.setData(uart.getRecivedData());
                     lastData = data.getLastData();
                     //FIXME receiving Data?
-                    display = true;
                     uart.setDataReady(false);
                     state = State.DISPLAY;
+
                 }
                 break;
             case DISPLAY:
@@ -178,14 +187,24 @@ public class Engine extends AsyncTask {
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
 
-        if(state==State.DISPLAY) {
+        if(display) {
             if (chart == null) {
                 ActivityStore.get("main").startActivity(IntentStore.get("chart"));
                 chart = (ChartActivity) ActivityStore.get("chart");
             } else {
-                if (display) {
+                if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     display = false;
-                    chart.plot(lastData);
+                    chart.getSupportActionBar().setTitle("\u2611 Connected to: "+DEVICE_NAME);
+                    chart.toolbar.setTitleTextColor(Color.rgb(50,205,50));
+                    if(uart.isDataReady()){
+                        chart.plot(lastData);
+                    }
+
+                }
+                else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED){
+                    state = State.IDLE;
+                    chart.getSupportActionBar().setTitle("\u2612 Disconnected");
+                    chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
                 }
             }
         }
