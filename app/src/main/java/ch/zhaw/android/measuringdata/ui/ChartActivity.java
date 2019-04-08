@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -31,7 +32,9 @@ import java.util.Date;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
+import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
+import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 public class ChartActivity extends AppCompatActivity {
 
@@ -41,6 +44,7 @@ public class ChartActivity extends AppCompatActivity {
     ArrayList<Entry> lastData;
     LineChart mpLineChart;
     boolean display;
+    boolean userWantCloseApp=false;
 
     public Toolbar toolbar;
 
@@ -78,6 +82,13 @@ public class ChartActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        this.onBackPressed();
+        return true;
+    }
+
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -87,6 +98,7 @@ public class ChartActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG,"Destroy");
         super.onDestroy();
         ActivityStore.put("chart",null);
     }
@@ -101,7 +113,7 @@ public class ChartActivity extends AppCompatActivity {
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        finish();
+                        userWantCloseApp=true;
                     }
                 })
                 .setNegativeButton(R.string.popup_no, null)
@@ -142,6 +154,10 @@ public class ChartActivity extends AppCompatActivity {
         mpLineChart.notifyDataSetChanged();
         mpLineChart.clear();
         mpLineChart.invalidate();
+    }
+
+    public boolean closeChart(){
+        return  userWantCloseApp;
     }
 
 }

@@ -77,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void closeApp(){
+        engine.cancel(true);
+        finish();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

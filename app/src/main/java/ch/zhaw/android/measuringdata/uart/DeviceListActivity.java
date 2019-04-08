@@ -165,6 +165,7 @@ public class DeviceListActivity extends Activity {
                 @Override
                 public void run() {
                     mScanning = false;
+                    scanner.stopScan(mLeScanCallback);
                     //mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     cancelButton.setText(R.string.scan);
                 }
@@ -176,7 +177,8 @@ public class DeviceListActivity extends Activity {
 
 
             cancelButton.setText(R.string.cancel);
-        } else {
+        }
+        else {
             mScanning = false;
             scanner.stopScan(mLeScanCallback);
             //mBluetoothAdapter.stopLeScan(mLeScanCallback);

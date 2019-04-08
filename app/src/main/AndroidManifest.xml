@@ -17,11 +17,11 @@
         <activity
             android:name=".ui.ChartActivity"
             android:label="@string/title_activity_chart"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.UartActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.zhaw.android.measuringdata.MainActivity" />
+                android:value="ch.zhaw.android.measuringdata.ui.UartActivity" />
         </activity>
 
 

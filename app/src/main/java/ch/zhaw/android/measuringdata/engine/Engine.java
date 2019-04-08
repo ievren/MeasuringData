@@ -11,6 +11,7 @@ import com.github.mikephil.charting.data.Entry;
 import java.util.ArrayList;
 
 import ch.zhaw.android.measuringdata.ActivityStore;
+import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
@@ -18,7 +19,7 @@ import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.utils.IntentStore;
 
-enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY}
+enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY, EXIT}
 
 public class Engine extends AsyncTask {
 
@@ -33,6 +34,7 @@ public class Engine extends AsyncTask {
 
     ChartActivity chart;
     UartActivity uart;
+    MainActivity main;
     Data data;
     Intent btBindIntent;
 
@@ -42,7 +44,7 @@ public class Engine extends AsyncTask {
     int btServiceState = 0;  //0=Disconnected, 1=Connecting, 2=Connected
     boolean loop = true;
     boolean run = false;
-    State state = State.IDLE;
+    public State state = State.IDLE;
     State oldState;
     ArrayList<Entry> lastData;
     int delay;
@@ -103,6 +105,14 @@ public class Engine extends AsyncTask {
             }
         }
 
+        if (main == null) {
+            main = (MainActivity) ActivityStore.get("main");
+        } else {
+            if (main != (MainActivity) ActivityStore.get("main")) {
+                main = (MainActivity) ActivityStore.get("main");
+            }
+        }
+
 
         switch (state) {
             case IDLE:
@@ -145,11 +155,11 @@ public class Engine extends AsyncTask {
                 break;
             case READ_DATA:
                 display = true;
-                if (uart.isDataReady() && delay > 10 ) {
+                if (uart.isDataReady() && delay > 20 ) {
                     delay = 0;
                     data.setData(uart.getRecivedData());
                     lastData = data.getLastData();
-                    //FIXME receiving Data?
+                    //FIXME receiving all Data?
                     uart.setDataReady(false);
                     state = State.DISPLAY;
 
@@ -161,6 +171,12 @@ public class Engine extends AsyncTask {
                     delay = 0;
                     state = State.CONNECTED;
                 }
+                break;
+            case EXIT:
+                this.cancel(true);
+                uart.finish();
+                chart.finish();
+                main.closeApp();
                 break;
 
         }
@@ -192,7 +208,10 @@ public class Engine extends AsyncTask {
                 ActivityStore.get("main").startActivity(IntentStore.get("chart"));
                 chart = (ChartActivity) ActivityStore.get("chart");
             } else {
-                if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
+                if(chart.closeChart()==true){
+                    state = State.EXIT;
+                }
+                else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     display = false;
                     chart.getSupportActionBar().setTitle("\u2611 Connected to: "+DEVICE_NAME);
                     chart.toolbar.setTitleTextColor(Color.rgb(50,205,50));
@@ -206,10 +225,13 @@ public class Engine extends AsyncTask {
                     chart.getSupportActionBar().setTitle("\u2612 Disconnected");
                     chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
                 }
+
             }
         }
 
 
         //Log.d(TAG, "onProgressUpdate");
     }
+
+
 }
