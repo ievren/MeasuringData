@@ -77,7 +77,6 @@ public class ChartActivity extends AppCompatActivity {
         leftAxis.setAxisMaximum(750);
         XAxis xAxis = mpLineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
         ActivityStore.put("chart",this);
     }
 
@@ -128,7 +127,7 @@ public class ChartActivity extends AppCompatActivity {
         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
 
         //MP-LineChart
-        LineDataSet lineDataSet1 = new LineDataSet(data, "Messung von:"+currentDateTimeString);
+        LineDataSet lineDataSet1 = new LineDataSet(data, "Messung von:   "+currentDateTimeString);
         lineDataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
         lineDataSet1.setDrawCircles(false);
         lineDataSet1.setDrawValues(false);
@@ -156,7 +155,7 @@ public class ChartActivity extends AppCompatActivity {
         mpLineChart.invalidate();
     }
 
-    public boolean closeChart(){
+    public boolean isUserWantCloseApp(){
         return  userWantCloseApp;
     }
 

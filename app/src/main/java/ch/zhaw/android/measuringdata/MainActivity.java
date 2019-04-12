@@ -79,8 +79,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void closeApp(){
         engine.cancel(true);
-        finish();
+        this.finish();
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

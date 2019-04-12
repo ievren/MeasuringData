@@ -37,6 +37,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -58,14 +59,17 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import ch.zhaw.android.measuringdata.ActivityStore;
+import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
 import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
+import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 import static android.app.PendingIntent.getActivity;
 
 public class UartActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
     public static final String TAG = UartActivity.class.getSimpleName();
+
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private final static int REQUEST_PERMISSION_REQ_CODE = 34; // any 8-bit number
@@ -74,13 +78,16 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
+
     private static final int STATE_OFF = 10;
 
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String DEVICE = "saved_device_address";
     public static final String DEVICE_Name = "saved_device_name";
+
     public static int DATALENGTH=244;
     public static int TOTALPACKAGES=3;
+
 
 
 
@@ -99,10 +106,13 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private Context permissonContext;
     private static String saved_device;
 
+    public static  boolean isConnectionLost = false;
+    boolean userWantCloseApp=false;
     private boolean isDataReady;
     private int packagecount=0;
     private byte[] rxValue;     //
     private byte[][] receivedData;   // [packagecount][received Data]
+
 
 
     @Override
@@ -212,6 +222,10 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     public boolean isDataReady(){
         return isDataReady;
     }
+    public boolean isConnectionLost(){
+        return isConnectionLost;
+    }
+
 
     public void setDataReady(boolean val) {
         isDataReady=val;
@@ -275,6 +289,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                         ((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
                         listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
                         messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                        isConnectionLost = false;
                         mState = UART_PROFILE_CONNECTED;
                     }
                 });
@@ -286,7 +301,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_DISCONNECT_MSG");
-                        setDataReady(false);
+                        isConnectionLost = true;
                         btnConnectDisconnect.setText("Connect");
                         edtMessage.setEnabled(false);
                         btnSend.setEnabled(false);
@@ -295,6 +310,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
                         //setUiState();
+
 
                     }
                 });
@@ -424,6 +440,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         return btServiceBound;
     }
 
+    public boolean isUserWantCloseApp(){
+        return  userWantCloseApp;
+    }
 
     /**
      * Activity Life-Cycle:
@@ -552,25 +571,15 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             mService.disconnect();
             //mService = null;
             showMessage("Disconnected, Service closed");
+            userWantCloseApp = true;
 
         }
-        finish();
-        // False back pressed -> Dialog
-        /*else {
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle(R.string.popup_title)
-                    .setMessage(R.string.popup_message)
-                    .setPositiveButton(R.string.popup_yes, new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    })
-                    .setNegativeButton(R.string.popup_no, null)
-                    .show();
-        }*/
+        else {
+            userWantCloseApp = true;
+            Log.d(TAG, "User want close app");
+        }
+
+        //finish();
     }
 
     public int checkConnectionEstablished (){

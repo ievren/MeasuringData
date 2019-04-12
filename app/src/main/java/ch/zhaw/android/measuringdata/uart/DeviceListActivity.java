@@ -86,7 +86,7 @@ public class DeviceListActivity extends Activity {
     List<BluetoothDevice> deviceList;
     private DeviceAdapter deviceAdapter;
     Map<String, Integer> devRssiValues;
-    private static final long SCAN_PERIOD = 10000; //scanning for 10 seconds
+    public static final long SCAN_PERIOD = 20000; //scanning for 10 seconds
     private Handler mHandler;
     private boolean mScanning;
 
@@ -135,7 +135,7 @@ public class DeviceListActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if (mScanning==false) scanLeDevice(true);
+                if (mScanning==false) scanLeDevice(true, SCAN_PERIOD);
                 else finish();
             }
         });
@@ -153,11 +153,11 @@ public class DeviceListActivity extends Activity {
         newDevicesListView.setAdapter(deviceAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
-        scanLeDevice(true);
+        scanLeDevice(true, SCAN_PERIOD);
 
     }
 
-    private void scanLeDevice(final boolean enable) {
+    private void scanLeDevice(final boolean enable,final long t_scan_period) {
         final Button cancelButton = (Button) findViewById(R.id.btn_cancel);
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -169,7 +169,7 @@ public class DeviceListActivity extends Activity {
                     //mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     cancelButton.setText(R.string.scan);
                 }
-            }, SCAN_PERIOD);
+            }, t_scan_period);
             mScanning = true;
             scanner.startScan(mLeScanCallback);
             //TODO TEST with Filter
@@ -317,7 +317,7 @@ public class DeviceListActivity extends Activity {
 
     protected void onPause() {
         super.onPause();
-        scanLeDevice(false);
+        scanLeDevice(false, SCAN_PERIOD);
     }
 
     class DeviceAdapter extends BaseAdapter {

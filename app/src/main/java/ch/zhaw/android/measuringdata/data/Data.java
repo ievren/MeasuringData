@@ -41,19 +41,14 @@ public class Data {
         //for (int j = 1; j < data.length; j+=2) {
         for (int i = 0; i <= packagenrs; i++) {
             for (int j = 0; j < data[0].length; j += 2) {
-                //rxData[(j-1)/2]=(short)((data[j]<<8)+data[j+1]);
-                // rxData[(j)/2]= (short)((data[j+1]<<8)+data[j]);
-                // no shift necessary
-                //rxData[i][(j) / 2] = ( ((data[i][j] << 8) + data[i][j + 1]) & 0xFF);
-                //rxData[i][(j) / 2] =   ((data[i][j]<<8) + data[i][j + 1]);
-                int a = (short) (data[i][j]<<8 );
-                int b = (byte) (data[i][j + 1] );
-                int c = 0;
+                char a = (char) (data[i][j]<<8 );
+                char b = (char)(data[i][j + 1] );
+                short c = 0;  //complement
                 if(a> 255){
-                    c = (a+b);
+                    c = (short)(a+b);
                 }
                 else {
-                    c = (a+b) &0xff;
+                    c = (short)((a+b) &0xff);
                 }
                 rxData[i][(j) / 2] = c;
                 log += String.format("[%d, %d]=%d ", i, j,  rxData[(i)][(j) / 2]); // rxdata & 0xFFFF -> unsigned
@@ -86,6 +81,13 @@ public class Data {
         }
         a=0;
         return list;
+    }
+
+    public ArrayList<Entry> getEmptyList(){
+        ArrayList<Entry> dataVals = new ArrayList();
+        dataVals.add(new Entry(0,0));
+        return dataVals;
+
     }
 
     /*

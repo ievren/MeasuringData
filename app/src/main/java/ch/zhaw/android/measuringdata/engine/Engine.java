@@ -174,8 +174,8 @@ public class Engine extends AsyncTask {
                 break;
             case EXIT:
                 this.cancel(true);
-                uart.finish();
                 chart.finish();
+                uart.finish();
                 main.closeApp();
                 break;
 
@@ -202,14 +202,19 @@ public class Engine extends AsyncTask {
     @Override
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
-
+        // DISPLAY
         if(display) {
             if (chart == null) {
                 ActivityStore.get("main").startActivity(IntentStore.get("chart"));
                 chart = (ChartActivity) ActivityStore.get("chart");
             } else {
-                if(chart.closeChart()==true){
+                if(chart.isUserWantCloseApp() || uart.isUserWantCloseApp()){
                     state = State.EXIT;
+                }
+                else if (state == State.IDLE){
+                    Log.d(TAG,"plot EmptyData");
+                    lastData = data.getEmptyList();
+                    chart.plot(lastData);
                 }
                 else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     display = false;
@@ -221,17 +226,14 @@ public class Engine extends AsyncTask {
 
                 }
                 else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED){
-                    state = State.IDLE;
                     chart.getSupportActionBar().setTitle("\u2612 Disconnected");
                     chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
                 }
-
+                else if(uart.isConnectionLost()){
+                    state = State.IDLE;
+                }
             }
         }
-
-
         //Log.d(TAG, "onProgressUpdate");
     }
-
-
 }
