@@ -174,9 +174,15 @@ public class Engine extends AsyncTask {
                 break;
             case EXIT:
                 this.cancel(true);
-                chart.finish();
+                Log.d(TAG, "this.cancel");
+                if(chart !=null){
+                    chart.finish();
+                    Log.d(TAG, "chart.cancel");
+                }
                 uart.finish();
+                Log.d(TAG, "uart.cancel");
                 main.closeApp();
+                Log.d(TAG, "main.cancel");
                 break;
 
         }
@@ -232,6 +238,16 @@ public class Engine extends AsyncTask {
                 else if(uart.isConnectionLost()){
                     state = State.IDLE;
                 }
+            }
+        }
+        else if(chart != null ){
+            if(chart.isUserWantCloseApp()) {
+                state = State.EXIT;
+            }
+        }
+        else if(uart !=null){
+            if(uart.isUserWantCloseApp()) {
+                state = State.EXIT;
             }
         }
         //Log.d(TAG, "onProgressUpdate");

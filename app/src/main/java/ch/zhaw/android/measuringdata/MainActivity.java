@@ -78,8 +78,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void closeApp(){
+        Log.d(TAG,"close App");
         engine.cancel(true);
-        this.finish();
+        finish();
     }
 
 
