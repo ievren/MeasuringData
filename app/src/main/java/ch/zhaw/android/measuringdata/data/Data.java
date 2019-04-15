@@ -11,10 +11,10 @@ import androidx.annotation.NonNull;
 public class Data {
 
     final static String TAG="Data";
-    final static int TOTALPACKAGES=3;
-    final static int FREQUENCE_S = 20; //Abtastrate 50 Hz -> 20ms
+    final static int TOTALPACKAGES=4;
+    final static float FREQUENCE_Hz = 500; //Abtastrate 500 Hz -> 2ms
 
-    float count=1;
+    double count=1;
     //
     int[][] rxData;
     ArrayList<Entry> dataList=new ArrayList();
@@ -63,29 +63,31 @@ public class Data {
     }
 
     public ArrayList<Entry> getLastData() {
-
-
+        String log="";
         // Manipulate arriving text with count
-        count+=0.1;
-        if(count>=2){
-            count=1;
-        }
-
+        count=3;
         ArrayList<Entry> list = new ArrayList<>();
         int a= 1;
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-                list.add(new Entry((a) * FREQUENCE_S/100, count* (rxData[i][j])) ); //count * rxData[i][j]));
+                list.add(new Entry((float) ((a * 1/FREQUENCE_Hz)),  (int)((rxData[i][j])/count) ) ); //count * rxData[i][j]));
+                log += String.format("[x:%f, y:%d], ", (float) ((a * 1/FREQUENCE_Hz)),  (int)((rxData[i][j])/ (float) count)); // rxdata & 0xFFFF -> unsigned
                 a++;
+
             }
         }
         a=0;
+        Log.d(TAG, "plot:" + log);
         return list;
     }
 
     public ArrayList<Entry> getEmptyList(){
         ArrayList<Entry> dataVals = new ArrayList();
         dataVals.add(new Entry(0,0));
+        dataVals.add(new Entry(500,100));
+        dataVals.add(new Entry(1000,500));
+        dataVals.add(new Entry(1500,100));
+        dataVals.add(new Entry(2000,100));
         return dataVals;
 
     }

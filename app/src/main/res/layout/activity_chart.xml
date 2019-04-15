@@ -21,8 +21,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <include layout="@layout/content_chart" />
-
     <!--100% — FF
     95% — F2
     90% — E6
@@ -44,6 +42,8 @@
     10% — 1A
     5% — 0D
     0% — 00-->
+    <include layout="@layout/content_chart" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

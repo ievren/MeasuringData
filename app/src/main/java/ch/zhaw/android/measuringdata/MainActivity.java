@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MeasuringApp";
     public static MainActivity obj;
 
+    public static  boolean isAppClosing = false;
     Intent chartIntent;
     Intent uartIntent;
     Intent mainIntent;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "created...");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -51,16 +53,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        //FIXME -> Doesent work nice... -> cant close..
         chartIntent = new Intent(MainActivity.this, ChartActivity.class);
+        chartIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(chartIntent);
+
         uartIntent = new Intent(MainActivity.this, UartActivity.class);
+        uartIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(uartIntent);
+
         mainIntent = new Intent(MainActivity.this, MainActivity.class);
         IntentStore.put("main",mainIntent);
         IntentStore.put("chart",chartIntent);
         IntentStore.put("uart",uartIntent);
         IntentStore.get("main");
+
+
+
 
 
         data = new Data();
@@ -77,10 +86,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void closeApp(){
-        Log.d(TAG,"close App");
-        engine.cancel(true);
+    public void closeApp() {
+        isAppClosing = true;
+        Log.d(TAG, "close App");
+        engine.setRun(false);
         finish();
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    public boolean getIsAppClosing(){
+        return isAppClosing;
     }
 
 

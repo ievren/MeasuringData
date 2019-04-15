@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -27,6 +28,9 @@ import android.view.WindowManager;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import ch.zhaw.android.measuringdata.ActivityStore;
@@ -36,7 +40,11 @@ import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.utils.IntentStore;
 
+import static java.util.Comparator.comparing;
+
 public class ChartActivity extends AppCompatActivity {
+
+    MainActivity main;
 
     static String TAG="CharActivity";
     public static final int DISPLAY = 101;
@@ -48,9 +56,26 @@ public class ChartActivity extends AppCompatActivity {
 
     public Toolbar toolbar;
 
+    YAxis rightYAxis;
+    YAxis leftAxis;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "created...");
+        if (main == null) {
+            main = (MainActivity) ActivityStore.get("main");
+        } else {
+            if (main != (MainActivity) ActivityStore.get("main")) {
+                main = (MainActivity) ActivityStore.get("main");
+            }
+        }
+        if(main !=null){
+            if( main.getIsAppClosing() ) {
+                finish();
+            }
+        }
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_chart);
         toolbar = findViewById(R.id.toolbar);
@@ -70,9 +95,9 @@ public class ChartActivity extends AppCompatActivity {
 
         mpLineChart = (LineChart) findViewById(R.id.line_chart);
         //Configure Axis
-        YAxis rightYAxis = mpLineChart.getAxisRight();
+        rightYAxis = mpLineChart.getAxisRight();
         rightYAxis.setEnabled(false);
-        YAxis leftAxis = mpLineChart.getAxisLeft();
+        leftAxis = mpLineChart.getAxisLeft();
         leftAxis.setAxisMinimum(0);
         leftAxis.setAxisMaximum(750);
         XAxis xAxis = mpLineChart.getXAxis();
@@ -113,10 +138,16 @@ public class ChartActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         userWantCloseApp=true;
+                        finish();
                     }
                 })
                 .setNegativeButton(R.string.popup_no, null)
                 .show();
+    }
+
+    public float getMax(LineData lineData){
+        float maxYData = (int) (Math.ceil(lineData.getYMax()));
+        return maxYData;
     }
 
     public void plot(ArrayList<Entry> data){
@@ -125,6 +156,7 @@ public class ChartActivity extends AppCompatActivity {
             resetChart();
         }
         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+        float maxValue = 0;
 
         //MP-LineChart
         LineDataSet lineDataSet1 = new LineDataSet(data, "Messung von:   "+currentDateTimeString);
@@ -137,6 +169,19 @@ public class ChartActivity extends AppCompatActivity {
         ArrayList<ILineDataSet> dataSets = new ArrayList();
         dataSets.add(lineDataSet1);
         LineData lineData = new LineData(dataSets);
+        lineDataSet1.notifyDataSetChanged();
+
+        lineDataSet1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        //lineDataSet1.setCubicIntensity(0.5f);
+
+        //get MAX
+        maxValue =  getMax(lineData);
+        LimitLine ll = new LimitLine(maxValue, "Max: "+maxValue);
+        ll.setLineColor(Color.RED);
+        ll.setLineWidth(4f);
+        ll.setTextColor(Color.BLACK);
+        ll.setTextSize(12f);
+        leftAxis.addLimitLine(ll);
 
 
 
@@ -144,10 +189,12 @@ public class ChartActivity extends AppCompatActivity {
         mpLineChart.setScaleYEnabled(false);
         mpLineChart.setData(lineData);
         mpLineChart.invalidate();
+
     }
 
     private void resetChart() {
-        mpLineChart.fitScreen();
+        //mpLineChart.fitScreen();
+        leftAxis.removeAllLimitLines();
         mpLineChart.getLineData().clearValues();
         mpLineChart.getXAxis().setValueFormatter(null);
         mpLineChart.notifyDataSetChanged();
