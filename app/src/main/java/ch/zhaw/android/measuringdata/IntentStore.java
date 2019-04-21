@@ -1,4 +1,4 @@
-package ch.zhaw.android.measuringdata.utils;
+package ch.zhaw.android.measuringdata;
 
 import android.app.Activity;
 import android.content.Intent;

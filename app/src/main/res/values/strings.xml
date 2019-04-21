@@ -60,4 +60,5 @@
     <string name="title_activity_chart">ChartActivity</string>
     <string name="action_uart">UART Activity</string>
     <string name="scanner_permission_rationale">Since Android 6.0 Marshmallow system requires granting access to device\\\'s location in order to scan for Bluetooth Smart devices. Bluetooth beacons may be used to determine the phone\\\'s and user\\\'s location.</string>
+    <string name="state_receiving_started">Measuring started...</string>
 </resources>

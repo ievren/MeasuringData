@@ -93,7 +93,13 @@ public class DeviceListActivity extends Activity {
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String DEVICE = "saved_device";
     private static final ParcelUuid FILTER_UUID = new ParcelUuid(BtService.UART_SERVICE_UUID);
+
+
+
     String autoConnectDevice = "";
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,8 +112,10 @@ public class DeviceListActivity extends Activity {
         layoutParams.y = 200;
         mHandler = new Handler();
 
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        autoConnectDevice = sharedPreferences.getString(DEVICE, "");
+        //SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        //autoConnectDevice = sharedPreferences.getString(DEVICE, "");
+        Intent uartToDeviceIntent = getIntent();
+        autoConnectDevice = uartToDeviceIntent.getStringExtra("STORED_DEVICE");
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -209,6 +217,8 @@ public class DeviceListActivity extends Activity {
                                   }
                                   if ( uuids.contains(FILTER_UUID) ) {
                                       Log.d(TAG,"ParcelUIIDS:"+uuids.contains(FILTER_UUID)+" Device: "+result.getDevice().getName());
+                                      Log.d(TAG,"Adress:"+result.getDevice().getAddress());
+                                      Log.d(TAG,"autoConnectDevice:"+autoConnectDevice);
                                       addDevice(result.getDevice(), result.getRssi());
                                   }
 

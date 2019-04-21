@@ -59,6 +59,7 @@ import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.R;
+import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
 
@@ -86,10 +87,13 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     public static int TOTALPACKAGES=4;
 
 
-
+    DeviceListActivity deviceActivity;
 
     TextView mRemoteRssiVal;
     RadioGroup mRg;
+
+    Engine engine;
+    private int retryCount = 0;
     private int mState = UART_PROFILE_DISCONNECTED;
     private BtService mService = null;
     boolean btServiceBound = false;
@@ -103,9 +107,13 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private Context permissonContext;
     private static String saved_device;
 
+
+
     public static  boolean isConnectionLost = false;
     public boolean isConnect = false;
-    boolean userWantCloseApp=false;
+    public boolean isStartReceived = false;
+
+    private boolean userWantCloseApp=false;
     private boolean isDataReady;
     private int packagecount=0;
     private byte[] rxValue;     //
@@ -158,26 +166,34 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                 }
                 else {
                     if (btnConnectDisconnect.getText().equals("Connect")){
-
+                        isConnect = true;
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
+                        // Autoconnect to saved_device
                         /*try {
                             boolean connected = mService.connect(saved_device);
                             if(connected ==true){
                                 mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(saved_device);
                                 mState = UART_PROFILE_CONNECTED;
+                                isConnect = false;
                             }
 
                         }catch (Exception ignore) {
                             Log.e(TAG, ignore.toString());
-                        }*/
+                        }
+                         */
                         if(mState !=UART_PROFILE_CONNECTED){
-                            Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
-                            startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+                            if(retryCount<3) {
+                                Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
+                                startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+                                retryCount++;
+                            }
                         }
                     } else {
                         //Disconnect button pressed
                         if (mDevice!=null)
                         {
+                            isConnect = false;
+                            clearDevice();
                             mService.disconnect();
 
                         }
@@ -234,6 +250,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     public void setConnect(boolean val) {
         isConnect=val;
         if(isConnect ==true) {
+            bindBtService();
             connectDisconnect();
         }
     }
@@ -249,10 +266,13 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     }
 
     public int checkConnectionEstablished (){
+        //Log.d(TAG, "checkConnectionEstablished"+mState);
         return mState;
     }
 
+    //Fixme AutoConnect
     public void connectDisconnect (){
+
         //Check Permissions
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -269,13 +289,18 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             if (btnConnectDisconnect.getText().equals("Connect")){
                 if(mState !=UART_PROFILE_CONNECTED){
                     isConnect=true;
-                    Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
-                    startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+                    if (deviceActivity == null) {
+                        Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
+                        //Using SharedPreferences for getting saved device
+                        newIntent.putExtra("STORED_DEVICE", saved_device);
+                        startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
+                    }
                 }
             } else {
                 //Disconnect button pressed
                 if (mDevice!=null)
                 {
+                    Log.d(TAG, "connectDisconnect:"+isConnect);
                     isConnect=false;
                     mService.disconnect();
                 }
@@ -284,7 +309,6 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     }
 
     //UART service connected/disconnected
-    //TODO Want check the Connect/disconnect state in Engine
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
@@ -332,6 +356,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                         messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
                         isConnectionLost = false;
                         mState = UART_PROFILE_CONNECTED;
+                        retryCount = 0;
                     }
                 });
             }
@@ -372,39 +397,48 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                             //TODO Try to get 5 packets -> and save in receivedData[0-4]
                             //String text = new String(rxValue, "UTF-8");
                             //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                            // 	listAdapter.add("["+currentDateTimeString+"] RX: "+text);
+                            //listAdapter.add("["+currentDateTimeString+"] RX: "+text);
                             //HEX ->
                             if(isDataReady){
                                 Log.d(TAG,"dataNotReset");
                                 return;
                             }
+                            //No Measuring Data -> commandData
+                            if (rxValue.length < 244){
+                                byte commandData[];
+                                commandData = rxValue;
+                                packagecount = 0;
+                                if(rxValue[0] == (byte) 0x8){
+                                    Log.d(TAG, "Start Byte received");
+                                    isStartReceived = true;
+                                }
 
-                            StringBuilder sb = new StringBuilder();
-                            for(int i = 0; i < rxValue.length; i++ ){
-                                sb.append(String.format("%02X ", rxValue[i]));
                             }
-                            Log.d(TAG,"receivedDataLength:"+rxValue.length+"receivedData:"+sb);
-                            Log.d(TAG,"packecount:"+packagecount);
 
+                            //Measuring DATA -> 244 length
+                            if (rxValue.length == 244) {
+                                /*
+                                //DeBUG
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < rxValue.length; i++) {
+                                    sb.append(String.format("%02X ", rxValue[i]));
+                                }
+                                Log.d(TAG, "receivedDataLength:" + rxValue.length + "receivedData:" + sb);
+                                Log.d(TAG, "packecount:" + packagecount);
+                                String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+                                //listAdapter.add("["+currentDateTimeString+"] Pckg:"+packagecount+"RX: "+sb.toString());
+                                messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                                */
 
-
-//                             int i=0;
-//                             while(rxValue[i] != '\n')
-//                             {
-//                                 sb.append(String.format("%02X ", rxValue[i]));
-//                                 i++;
-//                             }
-                            String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                            listAdapter.add("["+currentDateTimeString+"] Pckg:"+packagecount+"RX: "+sb.toString());
-                            messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-
-
-                            // Store the Data
-                            receivedData[packagecount-1] = rxValue;
-                            if(packagecount>=TOTALPACKAGES) {
-                                packagecount=0;
-                                isDataReady = true;
+                                // Store the Data
+                                receivedData[packagecount-1] = rxValue;
+                                if(packagecount>=TOTALPACKAGES) {
+                                    packagecount=0;
+                                    isDataReady = true;
+                                }
                             }
+
+
 
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
@@ -447,6 +481,13 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     }
 
+    private void clearDevice(){
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //sharedPreferences.edit().remove(DEVICE).commit();
+        sharedPreferences.edit().clear().commit();
+    }
+
     private void saveDevice(String deviceAddress) {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -462,7 +503,7 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     public void loadDevice() {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         saved_device = sharedPreferences.getString(DEVICE, "");
-        Log.d(TAG, "Stored Device is: "+ saved_device);
+        Log.d(TAG, "Stored Device is:"+saved_device);
     }
 
     public final String getSavedDevice(){

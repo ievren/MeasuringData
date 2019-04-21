@@ -4,21 +4,38 @@
     android:name="ch.zhaw.android.measuringdata.chart.ChartActivityFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".ui.ChartActivity"
     tools:showIn="@layout/activity_chart">
 
 
-
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/appCompatImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/design_default_color_secondary"
+        android:layout_width="624dp"
+        android:layout_height="309dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginBottom="18dp"
+        android:background="@color/colorPrimaryDark"
         android:fitsSystemWindows="true"
         android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/view2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.024"
         app:srcCompat="@drawable/new_ee_logo" />
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="#E6fefbf7"
+        app:layout_constraintEnd_toEndOf="@+id/scrollView2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:id="@+id/scrollView2"
@@ -37,25 +54,27 @@
                 <view
                     android:id="@+id/line_chart"
                     class="com.github.mikephil.charting.charts.LineChart"
-                    android:layout_width="match_parent"
-                    android:layout_height="347dp"
-                    android:layout_marginStart="24dp"
+                    android:layout_width="657dp"
+                    android:layout_height="333dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginEnd="2dp"
                     android:background="#E6fefbf7"
                     android:padding="@dimen/activity_horizontal_margin"
+                    android:visibility="visible"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/view2"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/textView"
                     android:layout_width="152dp"
                     android:layout_height="144dp"
+                    android:layout_marginStart="8dp"
                     android:rotation="-90"
                     android:text="Force [N]"
                     android:textColor="@color/black"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/appCompatImageView"
-                    tools:layout_editor_absoluteX="8dp" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/textView2"
@@ -71,17 +90,5 @@
 
         </LinearLayout>
     </ScrollView>
-
-    <View
-        android:id="@+id/view2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="#E6fefbf7"
-        app:layout_constraintBottom_toBottomOf="@+id/textView2"
-        app:layout_constraintEnd_toEndOf="@+id/scrollView2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/line_chart" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

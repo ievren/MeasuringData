@@ -14,9 +14,9 @@ import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
-import ch.zhaw.android.measuringdata.utils.IntentStore;
+import ch.zhaw.android.measuringdata.IntentStore;
 
-enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY, EXIT}
+enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY, CONNECTION_LOST, EXIT}
 
 public class Engine extends AsyncTask {
     static String TAG = "Engine";
@@ -33,12 +33,12 @@ public class Engine extends AsyncTask {
 
     Data data;
 
-    boolean display;
+    boolean display=false;
     boolean isConnect;
     boolean btServiceBound = false;
     int btServiceState = 0;  //0=Disconnected, 1=Connecting, 2=Connected
     boolean loop = true;
-    boolean run = false;
+    private boolean run = false;
     public State state = State.IDLE;
     State oldState;
     ArrayList<Entry> lastData;
@@ -74,12 +74,15 @@ public class Engine extends AsyncTask {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        //checkActivityStore();
+
     }
 
     @Override
     protected Integer doInBackground(Object[] objects) {
         while (loop) {
             if (run && !isCancelled()) {
+                checkActivityStore();
                 process();
             }
             try {
@@ -91,9 +94,88 @@ public class Engine extends AsyncTask {
         return 0;
     }
 
-    private void process() {
-        delay++;
+    @Override
+    protected void onPostExecute(Object o) {
+        super.onPostExecute(o);
 
+        //Log.d(TAG, "onPostExecute");
+
+
+    }
+
+    @Override
+    protected void onProgressUpdate(Object[] values) {
+        super.onProgressUpdate(values);
+
+        // DISPLAY
+        if(display && (delay > 2)) {
+            delay=0;
+            if (chart == null && state != State.EXIT) {
+                Log.d(TAG, "chart:"+chart);
+                ActivityStore.get("main").startActivity(IntentStore.get("chart"));
+                chart = (ChartActivity) ActivityStore.get("chart");
+            } else {
+                if(chart.isUserWantCloseApp() || uart.isUserWantCloseApp()){
+                    state = State.EXIT;
+                }
+                else if (state == State.IDLE){
+                    display = false;
+                    Log.d(TAG,"plot EmptyData");
+                    lastData = data.getEmptyList();
+                    chart.plot(lastData);
+
+                }
+                else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
+                    Log.d(TAG,"Connected to:"+DEVICE_NAME);
+                    display = false;
+                    chart.getSupportActionBar().setTitle("\u2611 Connected to: "+DEVICE_NAME);
+                    chart.toolbar.setTitleTextColor(Color.rgb(50,205,50));
+                    chart.plot(lastData);
+
+
+                }
+
+            }
+        }
+        else if(chart != null ){
+            if(chart.isUserWantCloseApp()) {
+                state = State.EXIT;
+            }
+            else if(uart.isStartReceived){
+                uart.isStartReceived = false;
+                chart.showStartReceived(true);
+            }
+        }
+        else if(uart !=null ){
+            if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED && chart !=null){
+                chart.getSupportActionBar().setTitle("\u2612 Disconnected");
+                chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
+            }
+            else if(uart.isUserWantCloseApp()) {
+                state = State.EXIT;
+            }
+            else if(uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED){
+                state = State.CONNECTED;
+            }
+            else if(uart.isConnectionLost()){
+                if( chart != null) {
+                    Log.d(TAG, "isConnectionLost:" + uart.isConnectionLost());
+                    chart.getSupportActionBar().setTitle("\u2612 Disconnected");
+                    chart.toolbar.setTitleTextColor(Color.rgb(244, 144, 66));
+                }
+                state = State.CONNECTION_LOST;
+
+            }
+
+        }
+    }
+
+    /**
+     * checkActivityStore
+     *
+     *
+     */
+    private void checkActivityStore(){
         if (chart == null) {
             chart = (ChartActivity) ActivityStore.get("chart");
         } else {
@@ -117,11 +199,25 @@ public class Engine extends AsyncTask {
             }
         }
 
+    }
+
+    /**
+     * Process()
+     * State Machine controlling UART and UI
+     */
+    private void process() {
+        delay++;
 
         switch (state) {
             case IDLE:
-                if (uart != null) {
-                    uart.setConnect(true);
+                if(chart != null){
+                    chart.finish();
+                }
+                else if (uart != null) {
+                    delay = 0;
+                    if(oldState!=State.CONNECTION_LOST){
+                        uart.setConnect(true);
+                    }
                     state = State.CONNECT;
                 }
                 break;
@@ -138,48 +234,47 @@ public class Engine extends AsyncTask {
                 break;
             case CONNECTED:
                 if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
-                    delay = 0;
                     DEVICE_NAME = (String) uart.getSavedDevice();
                     Log.d(TAG,"Device_Name="+DEVICE_NAME);
                     display = true;
                     state = State.READ_DATA;
-                } else {
-                    Log.v(TAG, "--Disconnected");
-                    int i = 0;
-                    //Try Reconnect
-                    while (i < 3) {
-                        Log.v(TAG, "--Try Reconnecting");
-                        uart.connectDisconnect();
-                        if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
-                            i = UART_PROFILE_CONNECTED;
-                        }
-                        i++;
-                    }
-                    state = State.CONNECT;
                 }
+                else {
+                    state = State.IDLE;
+                }
+
                 break;
             case READ_DATA:
-                if (uart.isDataReady() && delay > 20 ) {
+                if (uart.isDataReady()) {
                     display= false;
-                    delay = 0;
                     data.setData(uart.getRecivedData());
                     lastData = data.getLastData();
                     uart.setDataReady(false);
                     state = State.DISPLAY;
+                }
+                else if(uart.isConnectionLost()){
+                    state = State.CONNECTION_LOST;
 
                 }
                 break;
             case DISPLAY:
+                display = true;
                 // see onProgressUpdate
-                if (delay > 5) {
+                state = State.CONNECTED;
+                //}
+                break;
+            case CONNECTION_LOST:
+                if(delay > 20){
                     delay = 0;
-                    state = State.CONNECTED;
+                    state = State.IDLE;
                 }
                 break;
             case EXIT:
-                this.cancel(false);
-                uart.setConnect(false);
+                Log.d(TAG, "EXIT");
+                run =false;
                 display =false;
+                this.cancel(true);
+                uart.setConnect(false);
                 Log.d(TAG, "this.cancel");
                 if(chart !=null){
                     chart.finish();
@@ -190,7 +285,7 @@ public class Engine extends AsyncTask {
                     Log.d(TAG, "uart.cancel");
                 }
                 main.closeApp();
-                Log.d(TAG, "uart.cancel");
+                Log.d(TAG, "main.cancel");
                 break;
 
         }
@@ -203,65 +298,14 @@ public class Engine extends AsyncTask {
 
     }
 
-    @Override
-    protected void onPostExecute(Object o) {
-        super.onPostExecute(o);
-
-        //Log.d(TAG, "onPostExecute");
-
-
-    }
-
-
-
-    @Override
-    protected void onProgressUpdate(Object[] values) {
-        super.onProgressUpdate(values);
-        // DISPLAY
-        if(display) {
-            if (chart == null && state != State.EXIT) {
-                ActivityStore.get("main").startActivity(IntentStore.get("chart"));
-                chart = (ChartActivity) ActivityStore.get("chart");
-            } else {
-                if(chart.isUserWantCloseApp() || uart.isUserWantCloseApp()){
-                    state = State.EXIT;
-                }
-                else if (state == State.IDLE){
-                    display = false;
-                    Log.d(TAG,"plot EmptyData");
-                    lastData = data.getEmptyList();
-                    chart.plot(lastData);
-
-                }
-                else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
-                    display = false;
-                    chart.getSupportActionBar().setTitle("\u2611 Connected to: "+DEVICE_NAME);
-                    chart.toolbar.setTitleTextColor(Color.rgb(50,205,50));
-                    chart.plot(lastData);
-
-
-                }
-
-            }
+    public boolean getIsAppClosing() {
+        boolean ret;
+        if(state == State.EXIT){
+            ret= true;
         }
-
-        else if(chart != null ){
-            if(chart.isUserWantCloseApp()) {
-                state = State.EXIT;
-            }
+        else{
+            ret = false;
         }
-        else if(uart !=null ){
-            if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED && chart !=null){
-                chart.getSupportActionBar().setTitle("\u2612 Disconnected");
-                chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
-            }
-            else if(uart.isConnectionLost()){
-                state = State.IDLE;
-            }
-            else if(uart.isUserWantCloseApp()) {
-                state = State.EXIT;
-            }
-        }
-        //Log.d(TAG, "onProgressUpdate");
+        return ret;
     }
 }

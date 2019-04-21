@@ -1,6 +1,5 @@
 package ch.zhaw.android.measuringdata;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,9 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.engine.Engine;
-import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
-import ch.zhaw.android.measuringdata.utils.IntentStore;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -74,9 +71,11 @@ public class MainActivity extends AppCompatActivity {
 
         data = new Data();
         engine = new Engine(this);
+        Log.d(TAG,"engine:"+engine);
         engine.setChart((ChartActivity) ActivityStore.get("chart"));
         engine.setData(data);
         engine.setRun(true);
+        Log.d(TAG, "set Run true");
         engine.execute();
         //engine.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 
@@ -98,7 +97,9 @@ public class MainActivity extends AppCompatActivity {
         return isAppClosing;
     }
 
-
+    public Engine getEngine() {
+        return engine;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

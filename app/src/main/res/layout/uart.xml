@@ -27,7 +27,7 @@
         android:orientation="vertical" >
 
         <RelativeLayout
-            android:id="@+id/RelativeLayout1"
+            android:id="@+id/RelativeLayout01"
             android:layout_width="match_parent"
             android:layout_height="292dp"
             android:layout_weight="4.11"
@@ -70,7 +70,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/RelativeLayout1"
+        android:id="@+id/RelativeLayout02"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"

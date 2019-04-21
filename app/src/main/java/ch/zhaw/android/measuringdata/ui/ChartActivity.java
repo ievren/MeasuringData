@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -25,28 +24,29 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import android.widget.LinearLayout;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
 import ch.zhaw.android.measuringdata.engine.Engine;
-import ch.zhaw.android.measuringdata.uart.BtService;
-import ch.zhaw.android.measuringdata.utils.IntentStore;
+import ch.zhaw.android.measuringdata.utils.GifImageView;
 
 import static java.util.Comparator.comparing;
 
 public class ChartActivity extends AppCompatActivity {
 
     MainActivity main;
+    Engine engine;
 
-    static String TAG="CharActivity";
+    static String TAG="ChartActivity";
     public static final int DISPLAY = 101;
 
     ArrayList<Entry> lastData;
@@ -56,6 +56,12 @@ public class ChartActivity extends AppCompatActivity {
 
     public Toolbar toolbar;
 
+    GifImageView gifImageView;
+    @BindView(R.id.line_chart) View lineChartView;
+
+    LinearLayout receivingContainer;
+
+
     YAxis rightYAxis;
     YAxis leftAxis;
 
@@ -63,46 +69,66 @@ public class ChartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "created...");
-        if (main == null) {
+
+        if(ActivityStore.get("uart")==null){
+            this.finish();
+        }
+        else if(main == null){
             main = (MainActivity) ActivityStore.get("main");
-        } else {
-            if (main != (MainActivity) ActivityStore.get("main")) {
-                main = (MainActivity) ActivityStore.get("main");
+            Log.d(TAG,"main:"+main);
+            engine = main.getEngine();
+            Log.d(TAG,"engine:"+engine);
+            if(engine == null){
+                this.finish();
+            }
+            else {
+                if (engine.getIsAppClosing()) {
+                    this.finish();
+                }
             }
         }
-        if(main !=null){
-            if( main.getIsAppClosing() ) {
-                finish();
-            }
+
+
+        if (savedInstanceState==null) {//only the first time
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            setContentView(R.layout.activity_chart);
+            toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            ButterKnife.bind(this);
+            FloatingActionButton fab = findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+            //Prograss-Cart
+            receivingContainer = findViewById(R.id.receiving_container);
+
+            //Line-CHART
+            //mpLineChart = (LineChart) findViewById(R.id.line_chart);
+            mpLineChart = (LineChart) lineChartView;
+            mpLineChart.setBackgroundColor(getResources().getColor(R.color.transparentWhite));
+            //Configure Axis
+            rightYAxis = mpLineChart.getAxisRight();
+            rightYAxis.setEnabled(false);
+            leftAxis = mpLineChart.getAxisLeft();
+            leftAxis.setAxisMinimum(0);
+            leftAxis.setAxisMaximum(750);
+            XAxis xAxis = mpLineChart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         }
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_chart);
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Gif Animation
+        GifImageView gifImageView = (GifImageView) findViewById(R.id.gifLogo);
+        gifImageView.setGifImageResource(R.drawable.logo_rot);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
-
-        mpLineChart = (LineChart) findViewById(R.id.line_chart);
-        //Configure Axis
-        rightYAxis = mpLineChart.getAxisRight();
-        rightYAxis.setEnabled(false);
-        leftAxis = mpLineChart.getAxisLeft();
-        leftAxis.setAxisMinimum(0);
-        leftAxis.setAxisMaximum(750);
-        XAxis xAxis = mpLineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         ActivityStore.put("chart",this);
+
     }
 
     @Override
@@ -148,6 +174,12 @@ public class ChartActivity extends AppCompatActivity {
     public float getMax(LineData lineData){
         float maxYData = (int) (Math.ceil(lineData.getYMax()));
         return maxYData;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
     }
 
     public void plot(ArrayList<Entry> data){
@@ -200,10 +232,21 @@ public class ChartActivity extends AppCompatActivity {
         mpLineChart.notifyDataSetChanged();
         mpLineChart.clear();
         mpLineChart.invalidate();
+        receivingContainer.setVisibility(View.GONE);
     }
 
     public boolean isUserWantCloseApp(){
         return  userWantCloseApp;
     }
 
+    public void showStartReceived(boolean displayReceiving) {
+        Log.d(TAG,"startReceived showing");
+        if(displayReceiving ==true){
+            receivingContainer.setVisibility(View.VISIBLE);
+        }
+        else{
+            receivingContainer.setVisibility(View.GONE);
+        }
+
+    }
 }

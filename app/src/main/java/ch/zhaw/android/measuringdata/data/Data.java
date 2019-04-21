@@ -51,9 +51,9 @@ public class Data {
                     c = (short)((a+b) &0xff);
                 }
                 rxData[i][(j) / 2] = c;
-                log += String.format("[%d, %d]=%d ", i, j,  rxData[(i)][(j) / 2]); // rxdata & 0xFFFF -> unsigned
+                //log += String.format("[%d, %d]=%d ", i, j,  rxData[(i)][(j) / 2]); // rxdata & 0xFFFF -> unsigned
             }
-            Log.d(TAG, "data:" + log);
+            //Log.d(TAG, "data:" + log);
             log = "";
         }
 
@@ -64,30 +64,29 @@ public class Data {
 
     public ArrayList<Entry> getLastData() {
         String log="";
-        // Manipulate arriving text with count
-        count=3;
+        // Manipulate arriving data
         ArrayList<Entry> list = new ArrayList<>();
         int a= 1;
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-                list.add(new Entry((float) ((a * 1/FREQUENCE_Hz)),  (int)((rxData[i][j])/count) ) ); //count * rxData[i][j]));
-                log += String.format("[x:%f, y:%d], ", (float) ((a * 1/FREQUENCE_Hz)),  (int)((rxData[i][j])/ (float) count)); // rxdata & 0xFFFF -> unsigned
+                list.add(new Entry((float) ((a * 1/FREQUENCE_Hz)),  (int)((rxData[i][j])) ) ); //count * rxData[i][j]));
+                //log += String.format("[x:%f, y:%d], ", (float) ((a * 1/FREQUENCE_Hz)),  (int)((rxData[i][j])/ (float) count)); // rxdata & 0xFFFF -> unsigned
                 a++;
 
             }
         }
         a=0;
-        Log.d(TAG, "plot:" + log);
+        //Log.d(TAG, "plot:" + log);
         return list;
     }
 
     public ArrayList<Entry> getEmptyList(){
         ArrayList<Entry> dataVals = new ArrayList();
         dataVals.add(new Entry(0,0));
-        dataVals.add(new Entry(500,100));
-        dataVals.add(new Entry(1000,500));
-        dataVals.add(new Entry(1500,100));
-        dataVals.add(new Entry(2000,100));
+        //dataVals.add(new Entry(500,100));
+        //dataVals.add(new Entry(1000,500));
+        //dataVals.add(new Entry(1500,100));
+        //dataVals.add(new Entry(2000,100));
         return dataVals;
 
     }
