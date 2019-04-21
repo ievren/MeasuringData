@@ -124,7 +124,7 @@ public class ChartActivity extends AppCompatActivity {
         }
 
         //Gif Animation
-        GifImageView gifImageView = (GifImageView) findViewById(R.id.gifLogo);
+        gifImageView  = (GifImageView) findViewById(R.id.gifLogo);
         gifImageView.setGifImageResource(R.drawable.logo_rot);
 
         ActivityStore.put("chart",this);
@@ -243,6 +243,8 @@ public class ChartActivity extends AppCompatActivity {
         Log.d(TAG,"startReceived showing");
         if(displayReceiving ==true){
             receivingContainer.setVisibility(View.VISIBLE);
+            receivingContainer.invalidate();
+            gifImageView.setGifImageResource(R.drawable.logo_rot);
         }
         else{
             receivingContainer.setVisibility(View.GONE);

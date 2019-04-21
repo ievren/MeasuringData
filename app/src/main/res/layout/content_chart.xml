@@ -101,7 +101,7 @@
         android:orientation="vertical"
         android:padding="@dimen/activity_horizontal_margin"
         android:visibility="gone"
-        android:background="#E6fefbf7"
+        android:background="#ffffffff"
         app:layout_constraintBottom_toTopOf="@+id/view2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -109,13 +109,14 @@
         tools:visibility="visible">
 
         <TextView
-            android:id="@+id/connection_state"
+            android:id="@+id/measuring_state"
+            android:text="@string/state_receiving_started"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:textColor="@color/black"
             android:textSize="16sp"
-            tools:text="@string/state_receiving_started" />
+            />
 
         <ProgressBar
             android:id="@+id/progress_bar"
@@ -129,6 +130,7 @@
             android:layout_width="256dp"
             android:layout_height="256dp"
             android:layout_marginTop="8dp"
+            android:src="@drawable/logo_rot"
             app:layout_constraintTop_toTopOf="parent" />
     </LinearLayout>
 
