@@ -56,7 +56,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.zhaw.android.measuringdata.ui.UartActivity" />
         </activity>
-        <activity android:name=".ui.SettingsActivity">
+        <activity
+            android:name=".ui.SettingsActivity"
             android:theme="@style/AppTheme.SlidrActivityTheme">
         </activity>
 

@@ -91,6 +91,11 @@ public class Data {
 
     }
 
+    public void export(ArrayList<Entry> lastData) {
+         writer = null;
+
+    }
+
     /*
     public ArrayList<Entry> getLastData(){
         count+=.1;

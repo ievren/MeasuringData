@@ -140,6 +140,9 @@ public class Engine extends AsyncTask  {
                     chart.plot(lastData);
 
                 }
+                else if(chart.isUserWantExport()){
+                    data.export(lastData);
+                }
                 else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     Log.d(TAG, "Connected to:" + DEVICE_NAME);
                     display = false;

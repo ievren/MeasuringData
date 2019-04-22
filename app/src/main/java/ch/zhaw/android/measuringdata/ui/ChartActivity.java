@@ -49,6 +49,7 @@ public class ChartActivity extends AppCompatActivity {
     public Toolbar toolbar;
     boolean keep;
     boolean userWantCloseApp=false;
+    boolean userWantExport=false;
 
     static Random nr = new Random();
     static String TAG="ChartActivity"+nr.nextInt(10);
@@ -270,6 +271,10 @@ public class ChartActivity extends AppCompatActivity {
             receivingContainer.setVisibility(View.GONE);
         }
 
+    }
+
+    public boolean isUserWantExport(){
+        return userWantExport;
     }
 
 

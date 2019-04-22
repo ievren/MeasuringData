@@ -75,4 +75,7 @@ dependencies {
 
     //Settings-Slideable
     implementation 'com.r0adkll:slidableactivity:2.0.6'
+
+    //Export CSV
+    implementation 'com.opencsv:opencsv:4.0'
 }
