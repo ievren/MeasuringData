@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Chart Settings">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="check_box_relative_x_axes"
+            android:title="X-Axis realtive" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="check_box_relative_y_axes"
+            android:title="Y-Axis realtive" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="Device Settings">
+        <EditTextPreference
+            android:defaultValue="Saved Device"
+            android:key="edit_saved_device"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Saved Davice" />
+    </PreferenceCategory>
+</PreferenceScreen>

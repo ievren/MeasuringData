@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.engine.Engine;
+import ch.zhaw.android.measuringdata.ui.SettingsActivity;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static  boolean isAppClosing = false;
     Intent chartIntent;
     Intent uartIntent;
+    Intent settingsIntent;
     Intent mainIntent;
 
     Data data;
@@ -50,19 +52,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //FIXME -> Doesent work nice... -> cant close..
+        //FIXME -> Doesent work nice... -> cant close sometimes..
         chartIntent = new Intent(MainActivity.this, ChartActivity.class);
         chartIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        chartIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        chartIntent.putExtra("keep", false);
         startActivity(chartIntent);
 
         uartIntent = new Intent(MainActivity.this, UartActivity.class);
         uartIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        uartIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        uartIntent.putExtra("keep", false);
         startActivity(uartIntent);
 
         mainIntent = new Intent(MainActivity.this, MainActivity.class);
+        settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
         IntentStore.put("main",mainIntent);
         IntentStore.put("chart",chartIntent);
         IntentStore.put("uart",uartIntent);
+        IntentStore.put("settings",settingsIntent);
         IntentStore.get("main");
 
 
@@ -99,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
 
     public Engine getEngine() {
         return engine;
+    }
+
+    public void openSettingsActivity(View view){
+        Intent intent = new Intent(this, SettingsActivity.class);
+        ActivityStore.get("main").startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_in_right);
+
     }
 
     @Override

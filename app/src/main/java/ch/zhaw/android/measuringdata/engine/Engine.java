@@ -1,25 +1,31 @@
 package ch.zhaw.android.measuringdata.engine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 
 import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
+import java.util.Random;
 
+import androidx.appcompat.app.AppCompatActivity;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
+import ch.zhaw.android.measuringdata.ui.SettingsActivity;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.IntentStore;
 
 enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY, CONNECTION_LOST, EXIT}
 
-public class Engine extends AsyncTask {
-    static String TAG = "Engine";
+public class Engine extends AsyncTask  {
+    static Random number = new Random();
+    static String TAG = "Engine"+number.nextInt(10);
 
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
@@ -30,6 +36,10 @@ public class Engine extends AsyncTask {
     ChartActivity chart;
     UartActivity uart;
     MainActivity main;
+
+    Intent chartIntent;
+    Intent uartIntent;
+    Intent mainIntent;
 
     Data data;
 
@@ -75,6 +85,7 @@ public class Engine extends AsyncTask {
     protected void onPreExecute() {
         super.onPreExecute();
         //checkActivityStore();
+        Log.d(TAG,"preexecute");
 
     }
 
@@ -106,15 +117,19 @@ public class Engine extends AsyncTask {
     @Override
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
-
+        //uartIntent = IntentStore.get("uart");
+        //mainIntent = IntentStore.get("main");
+        chartIntent = IntentStore.get("chart");
         // DISPLAY
         if(display && (delay > 2)) {
             delay=0;
             if (chart == null && state != State.EXIT) {
                 Log.d(TAG, "chart:"+chart);
-                ActivityStore.get("main").startActivity(IntentStore.get("chart"));
+                chartIntent.putExtra("keep", true);
+                ActivityStore.get("main").startActivity(chartIntent);
                 chart = (ChartActivity) ActivityStore.get("chart");
-            } else {
+            }
+            else if(chart !=null) {
                 if(chart.isUserWantCloseApp() || uart.isUserWantCloseApp()){
                     state = State.EXIT;
                 }
@@ -126,17 +141,22 @@ public class Engine extends AsyncTask {
 
                 }
                 else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
-                    Log.d(TAG,"Connected to:"+DEVICE_NAME);
+                    Log.d(TAG, "Connected to:" + DEVICE_NAME);
                     display = false;
-                    chart.getSupportActionBar().setTitle("\u2611 Connected to: "+DEVICE_NAME);
-                    chart.toolbar.setTitleTextColor(Color.rgb(50,205,50));
+                    chart.getSupportActionBar().setTitle("\u2611 Connected to: " + DEVICE_NAME);
+                    chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
                     chart.plot(lastData);
-
-
                 }
-
+                else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED){
+                    chart.getSupportActionBar().setTitle("\u2612 Disconnected");
+                    chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
+                }
             }
+
+
+
         }
+
         else if(chart != null ){
             if(chart.isUserWantCloseApp()) {
                 state = State.EXIT;
@@ -308,4 +328,6 @@ public class Engine extends AsyncTask {
         }
         return ret;
     }
+
+
 }

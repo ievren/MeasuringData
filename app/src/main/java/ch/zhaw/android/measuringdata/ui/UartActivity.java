@@ -559,8 +559,8 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "onStop");
         super.onStop();
+        Log.d(TAG, "onStop");
        //unbindService(mServiceConnection);
         //btServiceBound = false;
     }

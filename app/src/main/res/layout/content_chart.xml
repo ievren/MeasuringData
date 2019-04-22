@@ -101,7 +101,7 @@
         android:orientation="vertical"
         android:padding="@dimen/activity_horizontal_margin"
         android:visibility="gone"
-        android:background="#ffffffff"
+        android:background="#FCFEFC"
         app:layout_constraintBottom_toTopOf="@+id/view2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -125,11 +125,12 @@
             android:layout_height="wrap_content"
             android:indeterminate="true" />
 
-        <ch.zhaw.android.measuringdata.utils.GifImageView
+        <pl.droidsonroids.gif.GifImageView
             android:id="@+id/gifLogo"
-            android:layout_width="256dp"
-            android:layout_height="256dp"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
             android:layout_marginTop="8dp"
+            android:background="#FCFEFC"
             android:src="@drawable/logo_rot"
             app:layout_constraintTop_toTopOf="parent" />
     </LinearLayout>

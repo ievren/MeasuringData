@@ -42,7 +42,9 @@
     10% — 1A
     5% — 0D
     0% — 00-->
-    <include layout="@layout/content_chart" />
+
+    <include
+        layout="@layout/content_chart" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

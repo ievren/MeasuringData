@@ -22,14 +22,15 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,7 +38,6 @@ import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
 import ch.zhaw.android.measuringdata.engine.Engine;
-import ch.zhaw.android.measuringdata.utils.GifImageView;
 
 import static java.util.Comparator.comparing;
 
@@ -45,90 +45,108 @@ public class ChartActivity extends AppCompatActivity {
 
     MainActivity main;
     Engine engine;
+    Intent chartIntent;
+    public Toolbar toolbar;
+    boolean keep;
+    boolean userWantCloseApp=false;
 
-    static String TAG="ChartActivity";
+    static Random nr = new Random();
+    static String TAG="ChartActivity"+nr.nextInt(10);
     public static final int DISPLAY = 101;
 
     ArrayList<Entry> lastData;
     LineChart mpLineChart;
-    boolean display;
-    boolean userWantCloseApp=false;
-
-    public Toolbar toolbar;
-
-    GifImageView gifImageView;
     @BindView(R.id.line_chart) View lineChartView;
-
     LinearLayout receivingContainer;
-
-
     YAxis rightYAxis;
     YAxis leftAxis;
+
+
+    //Swipe-detection
+    float x1,x2,y1,y2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "created...");
-
-        if(ActivityStore.get("uart")==null){
-            this.finish();
-        }
-        else if(main == null){
-            main = (MainActivity) ActivityStore.get("main");
-            Log.d(TAG,"main:"+main);
-            engine = main.getEngine();
-            Log.d(TAG,"engine:"+engine);
-            if(engine == null){
+        chartIntent = this.getIntent();
+        boolean keep = chartIntent.getExtras().getBoolean("keep");
+        Log.d(TAG, "Created...,keep:"+keep);
+        if(keep==true){
+            if(ActivityStore.get("uart")==null){
                 this.finish();
             }
-            else {
-                if (engine.getIsAppClosing()) {
+            else if(main == null){
+                main = (MainActivity) ActivityStore.get("main");
+                Log.d(TAG,"main:"+main);
+                engine = main.getEngine();
+                Log.d(TAG,"engine:"+engine);
+                if(engine == null){
                     this.finish();
                 }
-            }
-        }
-
-
-        if (savedInstanceState==null) {//only the first time
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            setContentView(R.layout.activity_chart);
-            toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-
-            ButterKnife.bind(this);
-            FloatingActionButton fab = findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                else {
+                    if (engine.getIsAppClosing()) {
+                        this.finish();
+                    }
                 }
-            });
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
 
-            //Prograss-Cart
-            receivingContainer = findViewById(R.id.receiving_container);
 
-            //Line-CHART
-            //mpLineChart = (LineChart) findViewById(R.id.line_chart);
-            mpLineChart = (LineChart) lineChartView;
-            mpLineChart.setBackgroundColor(getResources().getColor(R.color.transparentWhite));
-            //Configure Axis
-            rightYAxis = mpLineChart.getAxisRight();
-            rightYAxis.setEnabled(false);
-            leftAxis = mpLineChart.getAxisLeft();
-            leftAxis.setAxisMinimum(0);
-            leftAxis.setAxisMaximum(750);
-            XAxis xAxis = mpLineChart.getXAxis();
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            if (savedInstanceState==null) {//only the first time
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                setContentView(R.layout.activity_chart);
+                toolbar = findViewById(R.id.toolbar);
+                setSupportActionBar(toolbar);
+
+                ButterKnife.bind(this);
+                FloatingActionButton fab = findViewById(R.id.fab);
+                fab.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                });
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+                //Prograss-Cart
+                receivingContainer = findViewById(R.id.receiving_container);
+
+                //Line-CHART
+                //mpLineChart = (LineChart) findViewById(R.id.line_chart);
+                mpLineChart = (LineChart) lineChartView;
+                mpLineChart.setBackgroundColor(getResources().getColor(R.color.transparentWhite));
+                //Configure Axis
+                rightYAxis = mpLineChart.getAxisRight();
+                rightYAxis.setEnabled(false);
+                leftAxis = mpLineChart.getAxisLeft();
+                leftAxis.setAxisMinimum(0);
+                leftAxis.setAxisMaximum(750);
+                XAxis xAxis = mpLineChart.getXAxis();
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            }
+
+            ActivityStore.put("chart",this);
+
         }
+        else if (keep==false){
+            this.finish();
+        }
+    }
 
-        //Gif Animation
-        gifImageView  = (GifImageView) findViewById(R.id.gifLogo);
-        gifImageView.setGifImageResource(R.drawable.logo_rot);
-
-        ActivityStore.put("chart",this);
-
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+        super.onNewIntent(intent);
+        keep = intent.getExtras().getBoolean("keep");
+        Log.d(TAG, "On new Intent keep:"+keep);
+        if(keep==true){
+            ActivityStore.put("chart",this);
+        }
+        else if(keep==false)
+        {
+            this.finish();
+        }
     }
 
     @Override
@@ -148,8 +166,8 @@ public class ChartActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG,"Destroy");
         super.onDestroy();
+        Log.d(TAG, "onDestroy()");
         ActivityStore.put("chart",null);
     }
 
@@ -171,16 +189,19 @@ public class ChartActivity extends AppCompatActivity {
                 .show();
     }
 
-    public float getMax(LineData lineData){
-        float maxYData = (int) (Math.ceil(lineData.getYMax()));
-        return maxYData;
-    }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
     }
+
+    public float getMax(LineData lineData){
+        float maxYData = (int) (Math.ceil(lineData.getYMax()));
+        return maxYData;
+    }
+
+
 
     public void plot(ArrayList<Entry> data){
         if(mpLineChart.getLineData()!=null)
@@ -244,11 +265,47 @@ public class ChartActivity extends AppCompatActivity {
         if(displayReceiving ==true){
             receivingContainer.setVisibility(View.VISIBLE);
             receivingContainer.invalidate();
-            gifImageView.setGifImageResource(R.drawable.logo_rot);
         }
         else{
             receivingContainer.setVisibility(View.GONE);
         }
 
     }
+
+
+    public boolean onTouchEvent(MotionEvent touchEvent){
+        switch(touchEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                x1 = touchEvent.getX();
+                y1 = touchEvent.getY();
+                break;
+            case MotionEvent.ACTION_UP:
+                x2 = touchEvent.getX();
+                y2 = touchEvent.getY();
+                if(x1 < x2){
+                    //SwipeLeft detected
+                    Log.d(TAG,"Swipe-LEFT");
+                    //Intent i = new Intent(MainActivity.this, SwipeLeft.class);
+                    //startActivity(i);
+                }else if(x1 > x2){
+                    //SwipeLeft detected
+                    Log.d(TAG,"Swipe-Right");
+                    //Intent i = new Intent(MainActivity.this, SwipeRight.class);
+                    //startActivity(i);
+                }
+                break;
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -30,6 +30,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
     }
 
+
 }
 repositories {
     maven { url 'https://jitpack.io' }
@@ -52,6 +53,7 @@ dependencies {
     implementation 'com.jakewharton:butterknife:10.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     //implementation 'androidx.legacy:legacy-support-v13:1.0.0-beta01'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.0-beta01'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
     // Brings the new BluetoothLeScanner API to older platforms
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.0'
@@ -67,4 +69,10 @@ dependencies {
 
     //Graph - Chart library "MP Android", OpenSource
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    //Gif Animation
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.16'
+
+    //Settings-Slideable
+    implementation 'com.r0adkll:slidableactivity:2.0.6'
 }
