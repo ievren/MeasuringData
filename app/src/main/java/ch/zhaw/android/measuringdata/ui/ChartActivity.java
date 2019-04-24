@@ -3,6 +3,7 @@ package ch.zhaw.android.measuringdata.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -20,24 +21,29 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import java.io.FileInputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
+import androidx.core.view.GestureDetectorCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
 import ch.zhaw.android.measuringdata.engine.Engine;
+import ch.zhaw.android.measuringdata.utils.SwipeListener;
 
 import static java.util.Comparator.comparing;
 
@@ -49,7 +55,7 @@ public class ChartActivity extends AppCompatActivity {
     public Toolbar toolbar;
     boolean keep;
     boolean userWantCloseApp=false;
-    boolean userWantExport=false;
+    public boolean userWantExport=false;
 
     static Random nr = new Random();
     static String TAG="ChartActivity"+nr.nextInt(10);
@@ -62,8 +68,16 @@ public class ChartActivity extends AppCompatActivity {
     YAxis rightYAxis;
     YAxis leftAxis;
 
+    SharedPreferences SP = null;
+
+    String deviceName= "";
+    boolean xAxisRelative = false;
+    boolean yAxisRelative = false;
+
 
     //Swipe-detection
+    // This is the gesture detector compat instance.
+    private GestureDetectorCompat gestureDetectorCompat = null;
     float x1,x2,y1,y2;
 
 
@@ -92,40 +106,42 @@ public class ChartActivity extends AppCompatActivity {
                 }
             }
 
+            //Load settings
+            loadSettings();
 
-            if (savedInstanceState==null) {//only the first time
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                setContentView(R.layout.activity_chart);
-                toolbar = findViewById(R.id.toolbar);
-                setSupportActionBar(toolbar);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            setContentView(R.layout.activity_chart);
+            toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-                ButterKnife.bind(this);
-                FloatingActionButton fab = findViewById(R.id.fab);
-                fab.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            ButterKnife.bind(this);
+            FloatingActionButton fab = findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(engine.getLastData()!=null){
+                        userWantExport=true;
+                    }
+                    else {
+                        Snackbar.make(view, "Nothing to export", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
-                });
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-                //Prograss-Cart
-                receivingContainer = findViewById(R.id.receiving_container);
+                }
+            });
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-                //Line-CHART
-                //mpLineChart = (LineChart) findViewById(R.id.line_chart);
-                mpLineChart = (LineChart) lineChartView;
-                mpLineChart.setBackgroundColor(getResources().getColor(R.color.transparentWhite));
-                //Configure Axis
-                rightYAxis = mpLineChart.getAxisRight();
-                rightYAxis.setEnabled(false);
-                leftAxis = mpLineChart.getAxisLeft();
-                leftAxis.setAxisMinimum(0);
-                leftAxis.setAxisMaximum(750);
-                XAxis xAxis = mpLineChart.getXAxis();
-                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            }
+            // Create a common gesture listener object.
+            SwipeListener gestureListener = new SwipeListener();
+            // Create the gesture detector with the gesture listener.
+            gestureDetectorCompat = new GestureDetectorCompat(this, gestureListener);
+
+            //Prograss-Cart to show Measuring started..
+            receivingContainer = findViewById(R.id.receiving_container);
+
+            //Line-CHART
+            lineChartConfig(xAxisRelative,yAxisRelative);
+
 
             ActivityStore.put("chart",this);
 
@@ -135,6 +151,9 @@ public class ChartActivity extends AppCompatActivity {
         }
     }
 
+
+
+
     @Override
     protected void onNewIntent(Intent intent)
     {
@@ -142,6 +161,8 @@ public class ChartActivity extends AppCompatActivity {
         keep = intent.getExtras().getBoolean("keep");
         Log.d(TAG, "On new Intent keep:"+keep);
         if(keep==true){
+            //Line-CHART
+            lineChartConfig(xAxisRelative,yAxisRelative);
             ActivityStore.put("chart",this);
         }
         else if(keep==false)
@@ -152,9 +173,29 @@ public class ChartActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        this.onBackPressed();
+        switch (item.getItemId()) {
+            //Todo testing Settings
+            case  R.id.action_settings:
+                Log.d(String.valueOf(this), "Menu Item clicked->Settings");
+                Intent test_intent = new Intent(ChartActivity.this,
+                        SettingsActivity.class);
+                startActivity(test_intent);
+                return false;
+            case android.R.id.home:
+                this.onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chart, menu);
+        menu.findItem(R.id.action_settings);
         return true;
     }
+
+
 
 
     @Override
@@ -195,6 +236,42 @@ public class ChartActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // Pass activity on touch event to the gesture detector.
+        gestureDetectorCompat.onTouchEvent(event);
+        // Return true to tell android OS that event has been consumed, do not pass it to other event listeners.
+        return true;
+    }
+
+    private void loadSettings() {
+        SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        deviceName = SP.getString("edit_saved_device", "NA");
+        xAxisRelative = SP.getBoolean("check_box_relative_x_axes", false);
+        yAxisRelative = SP.getBoolean("check_box_relative_y_axes", false);
+    }
+
+    private void lineChartConfig(boolean xAxisRelative, boolean yAxisRelative) {
+        Log.d(TAG, "x:"+xAxisRelative+" y:"+yAxisRelative);
+        //mpLineChart = (LineChart) findViewById(R.id.line_chart);
+        mpLineChart = (LineChart) lineChartView;
+        mpLineChart.setBackgroundColor(getResources().getColor(R.color.transparentWhite));
+        //Configure Axis
+        rightYAxis = mpLineChart.getAxisRight();
+        rightYAxis.setEnabled(false);
+        leftAxis = mpLineChart.getAxisLeft();
+        if(yAxisRelative){
+            leftAxis.resetAxisMinimum();
+            leftAxis.resetAxisMaximum();
+        }else{
+            leftAxis.setAxisMinimum(0);
+            leftAxis.setAxisMaximum(750);
+        }
+        XAxis xAxis = mpLineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        leftAxis.removeAllLimitLines();
     }
 
     public float getMax(LineData lineData){
@@ -248,6 +325,8 @@ public class ChartActivity extends AppCompatActivity {
 
     private void resetChart() {
         //mpLineChart.fitScreen();
+        loadSettings();
+        lineChartConfig(xAxisRelative,yAxisRelative);
         leftAxis.removeAllLimitLines();
         mpLineChart.getLineData().clearValues();
         mpLineChart.getXAxis().setValueFormatter(null);
@@ -277,7 +356,7 @@ public class ChartActivity extends AppCompatActivity {
         return userWantExport;
     }
 
-
+/*
     public boolean onTouchEvent(MotionEvent touchEvent){
         switch(touchEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
@@ -302,6 +381,7 @@ public class ChartActivity extends AppCompatActivity {
         }
         return false;
     }
+    */
 
 
 

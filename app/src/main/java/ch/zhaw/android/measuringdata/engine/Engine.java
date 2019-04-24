@@ -3,12 +3,16 @@ package ch.zhaw.android.measuringdata.engine;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.data.Entry;
 
+import java.io.File;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -140,13 +144,10 @@ public class Engine extends AsyncTask  {
                     chart.plot(lastData);
 
                 }
-                else if(chart.isUserWantExport()){
-                    data.export(lastData);
-                }
                 else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     Log.d(TAG, "Connected to:" + DEVICE_NAME);
                     display = false;
-                    chart.getSupportActionBar().setTitle("\u2611 Connected to: " + DEVICE_NAME);
+                    chart.getSupportActionBar().setTitle("\u2611 Connected: " + DEVICE_NAME);
                     chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
                     chart.plot(lastData);
                 }
@@ -167,6 +168,24 @@ public class Engine extends AsyncTask  {
             else if(uart.isStartReceived){
                 uart.isStartReceived = false;
                 chart.showStartReceived(true);
+            }
+            else if(chart.isUserWantExport()){
+                chart.userWantExport =false;
+                //TODO EXPORT DATA
+                data.export(lastData, context);
+                String fileName ="./exported_data.csv";
+                File listFile = new File(fileName);
+                if(listFile.exists()) {
+                    Intent intentShareFile = new Intent(Intent.ACTION_SEND);
+                    intentShareFile.setType(URLConnection.guessContentTypeFromName(listFile.getName()));
+                    intentShareFile.putExtra(Intent.EXTRA_STREAM,
+                            Uri.parse("file://" + listFile.getAbsolutePath()));
+                    ActivityStore.get("chart").startActivity(Intent.createChooser(intentShareFile, "Share File"));
+                }
+                else {
+                    Toast.makeText(context, "Couldnt export data", Toast.LENGTH_SHORT).show();
+                }
+
             }
         }
         else if(uart !=null ){
@@ -321,6 +340,24 @@ public class Engine extends AsyncTask  {
 
     }
 
+    public ArrayList<Entry> getLastData() {
+        ArrayList<Entry> list = new ArrayList<>();
+        if(data !=null){
+            try {
+                list = data.getLastData();
+            }catch (NullPointerException e){
+                list = null;
+            }
+        }
+        else{
+            list = null;
+        }
+        return list;
+
+    }
+
+
+
     public boolean getIsAppClosing() {
         boolean ret;
         if(state == State.EXIT){
@@ -331,6 +368,7 @@ public class Engine extends AsyncTask  {
         }
         return ret;
     }
+
 
 
 }

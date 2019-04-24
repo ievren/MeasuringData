@@ -25,6 +25,7 @@ package ch.zhaw.android.measuringdata.ui;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -40,6 +41,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -50,6 +52,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -89,9 +92,6 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
     DeviceListActivity deviceActivity;
 
-    TextView mRemoteRssiVal;
-    RadioGroup mRg;
-
     Engine engine;
     private int retryCount = 0;
     private int mState = UART_PROFILE_DISCONNECTED;
@@ -117,9 +117,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
     private boolean isDataReady;
     private int packagecount=0;
     private byte[] rxValue;     //
-    private byte[][] receivedData;   // [packagecount][received Data]
+    private byte[][]receivedData;   // [packagecount][received Data]
 
-
+    float x1,x2,y1,y2;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,13 +134,13 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
             finish();
             return;
         }
-        messageListView = (ListView) findViewById(R.id.listMessage);
+        messageListView = findViewById(R.id.listMessage);
         listAdapter = new ArrayAdapter<String>(this, R.layout.message_detail);
         messageListView.setAdapter(listAdapter);
         messageListView.setDivider(null);
-        btnConnectDisconnect=(Button) findViewById(R.id.btn_select);
-        btnSend=(Button) findViewById(R.id.sendButton);
-        edtMessage = (EditText) findViewById(R.id.sendText);
+        btnConnectDisconnect= findViewById(R.id.btn_select);
+        btnSend= findViewById(R.id.sendButton);
+        edtMessage = findViewById(R.id.sendText);
 
         receivedData= new byte[TOTALPACKAGES][DATALENGTH];   // [packagecount][received Data]
 
@@ -204,24 +204,20 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
         // Handle Send button
         btnSend.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("NewApi")
             @Override
             public void onClick(View v) {
-                EditText editText = (EditText) findViewById(R.id.sendText);
+                EditText editText = findViewById(R.id.sendText);
                 String message = editText.getText().toString();
                 byte[] value;
-                try {
-                    //send data to service
-                    value = message.getBytes("UTF-8");
-                    mService.writeRXCharacteristic(value);
-                    //Update the log with time stamp
-                    String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                    listAdapter.add("["+currentDateTimeString+"] TX: "+ message);
-                    messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-                    edtMessage.setText("");
-                } catch (UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                //send data to service
+                value = message.getBytes(StandardCharsets.UTF_8);
+                mService.writeRXCharacteristic(value);
+                //Update the log with time stamp
+                String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+                listAdapter.add("["+currentDateTimeString+"] TX: "+ message);
+                messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
+                edtMessage.setText("");
 
             }
         });
@@ -232,6 +228,31 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
         //connectDisconnect();
         ActivityStore.put("uart",UartActivity.this);
+    }
+
+    public boolean onTouchEvent(MotionEvent touchEvent){
+        switch(touchEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                x1 = touchEvent.getX();
+                y1 = touchEvent.getY();
+                break;
+            case MotionEvent.ACTION_UP:
+                x2 = touchEvent.getX();
+                y2 = touchEvent.getY();
+                if(x1 < x2){
+                    //SwipeLeft detected
+                    Log.d(TAG,"Swipe-LEFT");
+                    //Intent i = new Intent(MainActivity.this, SwipeLeft.class);
+                    //startActivity(i);
+                }else if(x1 > x2){
+                    //SwipeLeft detected
+                    Log.d(TAG,"Swipe-Right");
+                    //Intent i = new Intent(MainActivity.this, SwipeRight.class);
+                    //startActivity(i);
+                }
+                break;
+        }
+        return false;
     }
 
 
@@ -405,10 +426,9 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                             }
                             //No Measuring Data -> commandData
                             if (rxValue.length < 244){
-                                byte commandData[];
-                                commandData = rxValue;
+                                //StartPacket
                                 packagecount = 0;
-                                if(rxValue[0] == (byte) 0x8){
+                                if(rxValue[0] == (byte) 0x6){
                                     Log.d(TAG, "Start Byte received");
                                     isStartReceived = true;
                                 }
@@ -417,8 +437,8 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
                             //Measuring DATA -> 244 length
                             if (rxValue.length == 244) {
-                                /*
-                                //DeBUG
+
+                                // TODO Check Data receiving is correct DEBUG
                                 StringBuilder sb = new StringBuilder();
                                 for (int i = 0; i < rxValue.length; i++) {
                                     sb.append(String.format("%02X ", rxValue[i]));
@@ -428,10 +448,10 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
                                 String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                                 //listAdapter.add("["+currentDateTimeString+"] Pckg:"+packagecount+"RX: "+sb.toString());
                                 messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-                                */
+
 
                                 // Store the Data
-                                receivedData[packagecount-1] = rxValue;
+                                receivedData[packagecount-1] =  rxValue;
                                 if(packagecount>=TOTALPACKAGES) {
                                     packagecount=0;
                                     isDataReady = true;
@@ -519,6 +539,10 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
         return;
     }
+
+
+
+
 
     public boolean checkBtServiceBound(){
         return btServiceBound;
