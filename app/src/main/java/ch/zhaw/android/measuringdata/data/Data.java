@@ -91,7 +91,7 @@ public class Data {
         int a= 1;
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-                list.add(new Entry((float) ((a * 1/FREQUENCE_Hz)),  (int)(rxData[i][j]) ) ); //count * rxData[i][j]));
+                list.add(new Entry(((a * 1/FREQUENCE_Hz)), (rxData[i][j])) ); //count * rxData[i][j]));
                 //log += String.format("[%f, %f], ", (float) ((a * 1/FREQUENCE_Hz)),  (int)(rxData[i][j]) ); // rxdata & 0xFFFF -> unsigned
                 a++;
 

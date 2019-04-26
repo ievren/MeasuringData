@@ -9,7 +9,8 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
+        android:id="@+id/appCompatImageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="195dp"
@@ -21,5 +22,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/new_ee_logo" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

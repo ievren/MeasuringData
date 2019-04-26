@@ -137,8 +137,8 @@ public class DeviceListActivity extends Activity {
             return;
         }
         populateList();
-        mEmptyList = (TextView) findViewById(R.id.empty);
-        Button cancelButton = (Button) findViewById(R.id.btn_cancel);
+        mEmptyList = findViewById(R.id.empty);
+        Button cancelButton = findViewById(R.id.btn_cancel);
         cancelButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,7 +157,7 @@ public class DeviceListActivity extends Activity {
         deviceAdapter = new DeviceAdapter(this, deviceList);
         devRssiValues = new HashMap<String, Integer>();
 
-        ListView newDevicesListView = (ListView) findViewById(R.id.new_devices);
+        ListView newDevicesListView = findViewById(R.id.new_devices);
         newDevicesListView.setAdapter(deviceAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
@@ -166,7 +166,7 @@ public class DeviceListActivity extends Activity {
     }
 
     private void scanLeDevice(final boolean enable,final long t_scan_period) {
-        final Button cancelButton = (Button) findViewById(R.id.btn_cancel);
+        final Button cancelButton = findViewById(R.id.btn_cancel);
         if (enable) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
@@ -367,10 +367,10 @@ public class DeviceListActivity extends Activity {
             }
 
             BluetoothDevice device = devices.get(position);
-            final TextView tvadd = ((TextView) vg.findViewById(R.id.address));
-            final TextView tvname = ((TextView) vg.findViewById(R.id.name));
-            final TextView tvpaired = (TextView) vg.findViewById(R.id.paired);
-            final TextView tvrssi = (TextView) vg.findViewById(R.id.rssi);
+            final TextView tvadd = vg.findViewById(R.id.address);
+            final TextView tvname = vg.findViewById(R.id.name);
+            final TextView tvpaired = vg.findViewById(R.id.paired);
+            final TextView tvrssi = vg.findViewById(R.id.rssi);
 
             tvrssi.setVisibility(View.VISIBLE);
             byte rssival = (byte) devRssiValues.get(device.getAddress()).intValue();

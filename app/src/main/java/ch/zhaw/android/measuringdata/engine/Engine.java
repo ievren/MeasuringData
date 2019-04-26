@@ -221,14 +221,14 @@ public class Engine extends AsyncTask  {
         if (chart == null) {
             chart = (ChartActivity) ActivityStore.get("chart");
         } else {
-            if (chart != (ChartActivity) ActivityStore.get("chart")) {
+            if (chart != ActivityStore.get("chart")) {
                 chart = (ChartActivity) ActivityStore.get("chart");
             }
         }
         if (uart == null) {
             uart = (UartActivity) ActivityStore.get("uart");
         } else {
-            if (uart != (UartActivity) ActivityStore.get("uart")) {
+            if (uart != ActivityStore.get("uart")) {
                 uart = (UartActivity) ActivityStore.get("uart");
             }
         }
@@ -236,7 +236,7 @@ public class Engine extends AsyncTask  {
         if (main == null) {
             main = (MainActivity) ActivityStore.get("main");
         } else {
-            if (main != (MainActivity) ActivityStore.get("main")) {
+            if (main != ActivityStore.get("main")) {
                 main = (MainActivity) ActivityStore.get("main");
             }
         }
@@ -276,7 +276,7 @@ public class Engine extends AsyncTask  {
                 break;
             case CONNECTED:
                 if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
-                    DEVICE_NAME = (String) uart.getSavedDevice();
+                    DEVICE_NAME = uart.getSavedDevice();
                     Log.d(TAG,"Device_Name="+DEVICE_NAME);
                     display = true;
                     state = State.READ_DATA;
@@ -360,12 +360,7 @@ public class Engine extends AsyncTask  {
 
     public boolean getIsAppClosing() {
         boolean ret;
-        if(state == State.EXIT){
-            ret= true;
-        }
-        else{
-            ret = false;
-        }
+        ret = state == State.EXIT;
         return ret;
     }
 

@@ -10,7 +10,7 @@
     tools:showIn="@layout/activity_chart">
 
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/appCompatImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         android:id="@+id/view2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#E6fefbf7"
+        android:background="@color/transparentWhite"
         app:layout_constraintEnd_toEndOf="@+id/scrollView2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -41,7 +41,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -58,7 +59,6 @@
                         android:layout_height="347dp"
                         android:layout_marginStart="24dp"
                         android:layout_marginEnd="4dp"
-                        android:background="#E6fefbf7"
                         android:padding="@dimen/activity_horizontal_margin"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -95,13 +95,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginStart="8dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:background="#FCFEFC"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="@dimen/activity_horizontal_margin"
         android:visibility="gone"
-        android:background="#FCFEFC"
         app:layout_constraintBottom_toTopOf="@+id/view2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -110,27 +111,18 @@
 
         <TextView
             android:id="@+id/measuring_state"
-            android:text="@string/state_receiving_started"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:text="@string/state_receiving_started"
             android:textColor="@color/black"
-            android:textSize="16sp"
-            />
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
+            android:textSize="16sp" />
 
         <pl.droidsonroids.gif.GifImageView
             android:id="@+id/gifLogo"
             android:layout_width="128dp"
             android:layout_height="128dp"
             android:layout_marginTop="8dp"
-            android:background="#FCFEFC"
             android:src="@drawable/logo_rot"
             app:layout_constraintTop_toTopOf="parent" />
     </LinearLayout>

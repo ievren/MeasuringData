@@ -1,6 +1,7 @@
 package ch.zhaw.android.measuringdata;
 
-import android.app.Activity;
+
+
 import android.content.Intent;
 
 import java.util.HashMap;

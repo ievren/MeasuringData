@@ -38,6 +38,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -51,12 +52,12 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.Date;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -66,9 +67,7 @@ import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
 
-import static android.app.PendingIntent.getActivity;
-
-public class UartActivity extends Activity implements RadioGroup.OnCheckedChangeListener {
+public class UartActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
     public static final String TAG = UartActivity.class.getSimpleName();
 
 
@@ -204,15 +203,16 @@ public class UartActivity extends Activity implements RadioGroup.OnCheckedChange
 
         // Handle Send button
         btnSend.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("NewApi")
             @Override
             public void onClick(View v) {
                 EditText editText = findViewById(R.id.sendText);
                 String message = editText.getText().toString();
                 byte[] value;
                 //send data to service
-                value = message.getBytes(StandardCharsets.UTF_8);
-                mService.writeRXCharacteristic(value);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    value = message.getBytes(StandardCharsets.UTF_8);
+                    mService.writeRXCharacteristic(value);
+                }
                 //Update the log with time stamp
                 String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                 listAdapter.add("["+currentDateTimeString+"] TX: "+ message);
