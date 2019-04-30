@@ -257,7 +257,7 @@ public class ChartActivity extends AppCompatActivity {
         Log.d(TAG, "x:"+xAxisRelative+" y:"+yAxisRelative);
         //mpLineChart = (LineChart) findViewById(R.id.line_chart);
         mpLineChart = (LineChart) lineChartView;
-        mpLineChart.setBackgroundColor(getResources().getColor(R.color.transparentWhite));
+        mpLineChart.setBackgroundColor(getResources().getColor(R.color.rotLogo_white));
         //Configure Axis
         rightYAxis = mpLineChart.getAxisRight();
         rightYAxis.setEnabled(false);

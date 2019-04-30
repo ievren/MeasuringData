@@ -4,5 +4,8 @@
     <color name="colorPrimaryDark">#1989CB</color>
     <color name="colorAccent">#42cbf4</color>
     <color name="transparentWhite">#E6fefbf7</color>
-    <color name="rotLogo_white">#FCFEFC"</color>
+    <color name="rotLogo_white">#fcfefc</color>
+
+    <color name="black">#000000</color>
+    <color name="whitegrey">#FFF2F2F2</color>
 </resources>
