@@ -11,6 +11,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -31,6 +32,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import java.io.FileInputStream;
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +44,7 @@ import butterknife.ButterKnife;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
+
 import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.utils.SwipeListener;
 
@@ -215,20 +218,8 @@ public class ChartActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.popup_title)
-                .setMessage(R.string.popup_message)
-                .setPositiveButton(R.string.popup_yes, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        userWantCloseApp=true;
-                        finish();
-                    }
-                })
-                .setNegativeButton(R.string.popup_no, null)
-                .show();
+        Log.d(TAG,"onBack pressed");
+        engine.connectDisconnect();
     }
 
 
@@ -290,6 +281,7 @@ public class ChartActivity extends AppCompatActivity {
         float maxValue = 0;
 
         //MP-LineChart
+
         LineDataSet lineDataSet1 = new LineDataSet(data, "Messung von:   "+currentDateTimeString);
         lineDataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
         lineDataSet1.setDrawCircles(false);

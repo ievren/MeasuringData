@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.github.mikephil.charting.data.Entry;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import ch.zhaw.android.measuringdata.utils.FileWriteHandle;
 
 public class Data {
 
@@ -21,7 +23,7 @@ public class Data {
     final static int TOTALPACKAGES=4;
     final static float FREQUENCE_Hz = 333; //Abtastrate
 
-    double count=1;
+    float count=1;
     //
     int[][] rxData;
     ArrayList<Entry> dataList=new ArrayList();
@@ -112,35 +114,27 @@ public class Data {
         return dataVals;
 
     }
+
+
+
     //FIXME ADDING EXPORT-FUNCTION
     //Save chart data
-    public void export(ArrayList<Entry> lastData, Context context) {
-        Log.d(TAG,"export called");
-        String fileName ="./exported_data.csv";
-        FileOutputStream out=null;
-        try{
-            out = context.openFileOutput("listFile", Context.MODE_PRIVATE);
-            ObjectOutputStream outputStream = new ObjectOutputStream(out);
-            outputStream.writeObject(lastData);
-            outputStream.close();
-        } catch (IOException e) {
-            Log.e(TAG,"export Data didnt work");
-            e.printStackTrace();
-        } finally {
-            try {
-                if( out !=  null){
-                    out.close();
-                    Log.d(TAG,"exported");
-                }
-            }catch (IOException e){
-                e.printStackTrace();
-            }
+    public void exportData(ArrayList<Entry> lastData) {
+        Log.d(TAG,"export called:"+lastData.get(1));
+        File root = android.os.Environment.getExternalStorageDirectory();
+        Log.d(TAG,"\nExternal file system root: "+root);
+        FileWriteHandle fileWriteHandle = new FileWriteHandle();
+        fileWriteHandle.open("/download","measuringData.tsv", false);
+        fileWriteHandle.writeFile("Time[s]\tForce[N]");
+        for (int n = 0; n < lastData.size(); n++) {
+            fileWriteHandle.writeFile(lastData.get(n).toString());
         }
+        fileWriteHandle.close();
 
     }
 
-    /*
-    public ArrayList<Entry> getLastData(){
+
+    public ArrayList<Entry> getTestData(){
         count+=.1;
         if(count==3.0){
             count=1;
@@ -172,5 +166,7 @@ public class Data {
         return dataVals;
 
     }
-    */
+
+
+
 }

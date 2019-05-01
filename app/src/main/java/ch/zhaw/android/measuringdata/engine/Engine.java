@@ -161,6 +161,7 @@ public class Engine extends AsyncTask  {
 
         }
 
+        //Close App
         else if(chart != null ){
             if(chart.isUserWantCloseApp()) {
                 state = State.EXIT;
@@ -172,7 +173,7 @@ public class Engine extends AsyncTask  {
             else if(chart.isUserWantExport()){
                 chart.userWantExport =false;
                 //TODO EXPORT DATA
-                data.export(lastData, context);
+                data.exportData(lastData);
                 String fileName ="./exported_data.csv";
                 File listFile = new File(fileName);
                 if(listFile.exists()) {
@@ -363,6 +364,12 @@ public class Engine extends AsyncTask  {
         ret = state == State.EXIT;
         return ret;
     }
+
+    public void connectDisconnect(){
+        uart.connectDisconnect();
+    }
+
+
 
 
 

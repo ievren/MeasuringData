@@ -27,11 +27,13 @@ package ch.zhaw.android.measuringdata.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -670,24 +672,37 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
     @Override
     public void onBackPressed() {
-        if (mState == UART_PROFILE_CONNECTED) {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.popup_title)
+                .setMessage(R.string.popup_message)
+                .setPositiveButton(R.string.popup_yes, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (mState == UART_PROFILE_CONNECTED) {
             /*Intent startMain = new Intent(Intent.ACTION_MAIN);
             startMain.addCategory(Intent.CATEGORY_HOME);
             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(startMain)
             showMessage("nRFUART's running in background.\n             Disconnect to exit");;*/
-            mService.disconnect();
-            //mService = null;
-            showMessage("Disconnected, Service closed");
-            userWantCloseApp = true;
+                            mService.disconnect();
+                            //mService = null;
+                            showMessage("Disconnected, Service closed");
+                            userWantCloseApp = true;
 
-        }
-        else {
-            userWantCloseApp = true;
-            Log.d(TAG, "User want close app");
+                        }
+                        else {
+                            userWantCloseApp = true;
+                            Log.d(TAG, "User want close app");
 
-        }
-        finish();
+                        }
+                        finish();
+                    }
+                })
+                .setNegativeButton(R.string.popup_no, null)
+                .show();
+
     }
 
 }

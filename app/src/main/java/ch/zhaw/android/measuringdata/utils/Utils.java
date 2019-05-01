@@ -61,6 +61,16 @@ public class Utils {
 	}
 
 	/**
+	 * Checks for required permissions.
+	 *
+	 * @return True if permissions are already granted, false otherwise.
+	 */
+	public static boolean isStoragePermissionsGranted(@NonNull final Context context) {
+		return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+				== PackageManager.PERMISSION_GRANTED;
+	}
+
+	/**
 	 * Returns true if location permission has been requested at least twice and
 	 * user denied it, and checked 'Don't ask again'.
 	 *
