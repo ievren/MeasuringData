@@ -1,10 +1,15 @@
 package ch.zhaw.android.measuringdata.ui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -19,6 +24,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -28,16 +34,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
-import java.io.FileInputStream;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,13 +59,17 @@ import static java.util.Comparator.comparing;
 
 public class ChartActivity extends AppCompatActivity {
 
+    public static final String SHARED_PREFS = "sharedPrefs";
+
     MainActivity main;
     Engine engine;
     Intent chartIntent;
     public Toolbar toolbar;
     boolean keep;
     boolean userWantCloseApp=false;
+    boolean userWantGoBack = false;
     public boolean userWantExport=false;
+    boolean displayHasRotated = false;
 
     static Random nr = new Random();
     static String TAG="ChartActivity"+nr.nextInt(10);
@@ -67,6 +78,7 @@ public class ChartActivity extends AppCompatActivity {
     ArrayList<Entry> lastData;
     LineChart mpLineChart;
     @BindView(R.id.line_chart) View lineChartView;
+    FloatingActionButton fab;
     LinearLayout receivingContainer;
     YAxis rightYAxis;
     YAxis leftAxis;
@@ -74,8 +86,11 @@ public class ChartActivity extends AppCompatActivity {
     SharedPreferences SP = null;
 
     String deviceName= "";
-    boolean xAxisRelative = false;
-    boolean yAxisRelative = false;
+    int     yAxisMaxValue = 500;
+    boolean xAxisDynamic = false;
+    boolean yAxisDynamic = false;
+    boolean maxLimitSetting =true;
+    boolean preLimitSetting = true;
 
 
     //Swipe-detection
@@ -96,9 +111,9 @@ public class ChartActivity extends AppCompatActivity {
             }
             else if(main == null){
                 main = (MainActivity) ActivityStore.get("main");
-                Log.d(TAG,"main:"+main);
+                //Log.d(TAG,"main:"+main);
                 engine = main.getEngine();
-                Log.d(TAG,"engine:"+engine);
+                //Log.d(TAG,"engine:"+engine);
                 if(engine == null){
                     this.finish();
                 }
@@ -108,22 +123,31 @@ public class ChartActivity extends AppCompatActivity {
                     }
                 }
             }
-
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            setContentView(R.layout.activity_chart);
             //Load settings
             loadSettings();
 
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            setContentView(R.layout.activity_chart);
             toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
-
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             ButterKnife.bind(this);
-            FloatingActionButton fab = findViewById(R.id.fab);
+            fab = findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if(engine.getLastData()!=null){
-                        userWantExport=true;
+                        Context context = getApplicationContext();
+                        if(CheckStoragePermission(context)){
+                            userWantExport=true;
+                        }
+                        else{
+                            Snackbar.make(view, "No Data Write Permission granted", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                        //ActivityCompat.requestPermissions(ChartActivity.this,
+                        //        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+
                     }
                     else {
                         Snackbar.make(view, "Nothing to export", Snackbar.LENGTH_LONG)
@@ -132,7 +156,25 @@ public class ChartActivity extends AppCompatActivity {
 
                 }
             });
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+            if (engine.getDisplayOrientation() != getResources().getConfiguration().orientation){
+                Log.d(TAG, "!>engine display:"+engine.getDisplayOrientation()+", new Orientation "+getResources().getConfiguration().orientation);
+                displayHasRotated =true;
+
+
+            }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                engine.setDisplayOrientation(Configuration.ORIENTATION_LANDSCAPE); //2
+                Log.d(TAG, "engine display:"+engine.getDisplayOrientation());
+                getSupportActionBar().hide();
+                fab.hide();
+            }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                engine.setDisplayOrientation(Configuration.ORIENTATION_PORTRAIT); //1
+                Log.d(TAG, "engine display:"+engine.getDisplayOrientation());
+            }
+
 
             // Create a common gesture listener object.
             SwipeListener gestureListener = new SwipeListener();
@@ -143,7 +185,7 @@ public class ChartActivity extends AppCompatActivity {
             receivingContainer = findViewById(R.id.receiving_container);
 
             //Line-CHART
-            lineChartConfig(xAxisRelative,yAxisRelative);
+            lineChartConfig(xAxisDynamic, yAxisDynamic);
 
 
             ActivityStore.put("chart",this);
@@ -165,7 +207,7 @@ public class ChartActivity extends AppCompatActivity {
         Log.d(TAG, "On new Intent keep:"+keep);
         if(keep==true){
             //Line-CHART
-            lineChartConfig(xAxisRelative,yAxisRelative);
+            lineChartConfig(xAxisDynamic, yAxisDynamic);
             ActivityStore.put("chart",this);
         }
         else if(keep==false)
@@ -198,8 +240,32 @@ public class ChartActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        if(ActivityStore.get("uart")==null){
+            this.finish();
+        }
+        else if(main == null){
+            main = (MainActivity) ActivityStore.get("main");
+            //Log.d(TAG,"main:"+main);
+            engine = main.getEngine();
+            //Log.d(TAG,"engine:"+engine);
+            if(engine == null){
+                this.finish();
+            }
+            else {
+                if (engine.getIsAppClosing()) {
+                    this.finish();
+                }
+            }
+        }
+        engine.setUserRotated(displayHasRotated);
+        displayHasRotated = false;
+        engine.setDisplayReady(true);
 
-
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -219,7 +285,7 @@ public class ChartActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         Log.d(TAG,"onBack pressed");
-        engine.connectDisconnect();
+        userWantGoBack = true;
     }
 
 
@@ -227,6 +293,7 @@ public class ChartActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
+        userWantCloseApp=true;
     }
 
     @Override
@@ -236,12 +303,45 @@ public class ChartActivity extends AppCompatActivity {
         // Return true to tell android OS that event has been consumed, do not pass it to other event listeners.
         return true;
     }
+    @TargetApi(Build.VERSION_CODES.M)
+    public boolean CheckStoragePermission(@NonNull final Context context) {
+        int permissionCheckRead = ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissionCheckRead != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        1);
+            } else {
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        1);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+            return false;
+        } else
+            return true;
+    }
+
+
 
     private void loadSettings() {
         SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        xAxisDynamic = SP.getBoolean("check_box_relative_x_axes", false);
+        yAxisDynamic = SP.getBoolean("check_box_relative_y_axes", false);
         deviceName = SP.getString("edit_saved_device", "NA");
-        xAxisRelative = SP.getBoolean("check_box_relative_x_axes", false);
-        yAxisRelative = SP.getBoolean("check_box_relative_y_axes", false);
+        maxLimitSetting = SP.getBoolean("limit_line_max", true);
+        preLimitSetting = SP.getBoolean("limit_line_preForce",true);
+
     }
 
     private void lineChartConfig(boolean xAxisRelative, boolean yAxisRelative) {
@@ -258,11 +358,27 @@ public class ChartActivity extends AppCompatActivity {
             leftAxis.resetAxisMaximum();
         }else{
             leftAxis.setAxisMinimum(0);
-            leftAxis.setAxisMaximum(750);
+            leftAxis.setAxisMaximum(yAxisMaxValue);
         }
         XAxis xAxis = mpLineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         leftAxis.removeAllLimitLines();
+    }
+
+    public int getDetectedPeak(ArrayList<Entry> data) {
+        int ret = 0;
+        int threshold = 20;
+        boolean isPeak = false;
+        for (int n = 0; (n < data.size() - 1) && !isPeak; n++) {
+            float value = data.get(n).getY();
+            float delta = data.get(n + 1).getY() - data.get(n).getY();
+            if (delta > 0 && delta > threshold) {
+                System.out.println("Start Peak is "+data.get(n).getY()+" at:" + data.get(n).getX());
+                isPeak = true;
+                ret = n;
+            }
+        }
+        return ret;
     }
 
     public float getMax(LineData lineData){
@@ -272,13 +388,44 @@ public class ChartActivity extends AppCompatActivity {
 
 
 
+    /**
+     * Calculates the pre Force of the Measurement
+     * 1. First it has to detect the Peak using -> getDetectedPeak()
+     * 2. Than we look at a window sized length before this peak -> window
+     * 3. The average of the points in this window is the preForce.
+     * @param data
+     * @return index before the peek Starts
+     */
+    public float getPreForce(ArrayList<Entry> data){
+        float ret=0;
+        int window = 50;
+        int peakAt = getDetectedPeak(data);
+        if(peakAt-(3*window) > 0) {
+            Log.d(TAG,"peakAt:"+data.get(peakAt-(2*window)).getX()+","+data.get(peakAt-(2*window)).getY());
+            for (int n = peakAt - (3 * window); n < peakAt - window; n++) {
+                //Log.d(TAG,"avg of:"+data.get(n).getX()+","+data.get(n).getY());
+                ret += data.get(n).getY();
+
+            }
+            ret = ret / (2*window);
+            //Log.d(TAG,"PreForce"+ret);
+        }
+        return ret;
+    }
+
+
+
+
+
     public void plot(ArrayList<Entry> data){
+        Log.d(TAG, "plotting...");
         if(mpLineChart.getLineData()!=null)
         {
             resetChart();
         }
         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
         float maxValue = 0;
+        float preForce = 0;
 
         //MP-LineChart
 
@@ -298,13 +445,37 @@ public class ChartActivity extends AppCompatActivity {
         //lineDataSet1.setCubicIntensity(0.5f);
 
         //get MAX
-        maxValue =  getMax(lineData);
-        LimitLine ll = new LimitLine(maxValue, "Max: "+maxValue);
-        ll.setLineColor(Color.RED);
-        ll.setLineWidth(4f);
-        ll.setTextColor(Color.BLACK);
-        ll.setTextSize(12f);
-        leftAxis.addLimitLine(ll);
+        if(maxLimitSetting){
+            maxValue =  getMax(lineData);
+            LimitLine max_limit = new LimitLine(maxValue, "Max: "+maxValue);
+            max_limit.setLineColor(Color.RED);
+            max_limit.setLineWidth(4f);
+            max_limit.setTextColor(Color.BLACK);
+            max_limit.setTextSize(12f);
+            leftAxis.addLimitLine(max_limit);
+
+        }
+
+
+        //lower Limit
+        if(preLimitSetting){
+            if(data!=null){
+                if(data.size()>100) {
+                    preForce = getPreForce(data);
+                    if(preForce!=0){
+                        LimitLine lower_limit = new LimitLine(preForce, "Pre Force:"+preForce);
+                        lower_limit.setLineWidth(4f);
+                        lower_limit.setLineColor(getResources().getColor(R.color.colorPrimaryDark));
+                        lower_limit.enableDashedLine(10f, 10f, 0f);
+                        lower_limit.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_TOP);
+                        lower_limit.setTextSize(10f);
+                        leftAxis.addLimitLine(lower_limit);
+                    }
+                }
+            }
+        }
+
+
 
 
 
@@ -318,7 +489,7 @@ public class ChartActivity extends AppCompatActivity {
     private void resetChart() {
         //mpLineChart.fitScreen();
         loadSettings();
-        lineChartConfig(xAxisRelative,yAxisRelative);
+        lineChartConfig(xAxisDynamic, yAxisDynamic);
         leftAxis.removeAllLimitLines();
         mpLineChart.getLineData().clearValues();
         mpLineChart.getXAxis().setValueFormatter(null);
@@ -346,6 +517,10 @@ public class ChartActivity extends AppCompatActivity {
 
     public boolean isUserWantExport(){
         return userWantExport;
+    }
+
+    public boolean isUserWantGoBack() {
+        return userWantGoBack;
     }
 
 /*

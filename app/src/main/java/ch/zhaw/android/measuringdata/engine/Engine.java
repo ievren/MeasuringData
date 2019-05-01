@@ -5,23 +5,20 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.data.Entry;
 
 import java.io.File;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Random;
 
-import androidx.appcompat.app.AppCompatActivity;
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
-import ch.zhaw.android.measuringdata.ui.SettingsActivity;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.IntentStore;
 
@@ -48,6 +45,9 @@ public class Engine extends AsyncTask  {
     Data data;
 
     boolean display=false;
+    boolean isDisplayReady = false;
+    int displayOrientation = 0;
+    boolean userHasRotated = false;
     boolean isConnect;
     boolean btServiceBound = false;
     int btServiceState = 0;  //0=Disconnected, 1=Connecting, 2=Connected
@@ -125,7 +125,7 @@ public class Engine extends AsyncTask  {
         //mainIntent = IntentStore.get("main");
         chartIntent = IntentStore.get("chart");
         // DISPLAY
-        if(display && (delay > 2)) {
+        if(display && (delay > 2) || userHasRotated && (delay > 2)) {
             delay=0;
             if (chart == null && state != State.EXIT) {
                 Log.d(TAG, "chart:"+chart);
@@ -135,6 +135,7 @@ public class Engine extends AsyncTask  {
             }
             else if(chart !=null) {
                 if(chart.isUserWantCloseApp() || uart.isUserWantCloseApp()){
+                    Log.d(TAG,"User want close app detected");
                     state = State.EXIT;
                 }
                 else if (state == State.IDLE){
@@ -144,14 +145,23 @@ public class Engine extends AsyncTask  {
                     chart.plot(lastData);
 
                 }
-                else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
+                //RotatedScreen
+                else if(userHasRotated==true && isDisplayReady){
+                    Log.d(TAG,"User Rotated");
+                    userHasRotated=false;
+                    chart.getSupportActionBar().setTitle("\u2611 Connected: " + DEVICE_NAME);
+                    chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
+                    chart.plot(lastData);
+                    display = false;
+                }
+                else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED && isDisplayReady) {
                     Log.d(TAG, "Connected to:" + DEVICE_NAME);
                     display = false;
                     chart.getSupportActionBar().setTitle("\u2611 Connected: " + DEVICE_NAME);
                     chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
                     chart.plot(lastData);
                 }
-                else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED){
+                else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED && isDisplayReady){
                     chart.getSupportActionBar().setTitle("\u2612 Disconnected");
                     chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
                 }
@@ -163,22 +173,29 @@ public class Engine extends AsyncTask  {
 
         //Close App
         else if(chart != null ){
-            if(chart.isUserWantCloseApp()) {
-                state = State.EXIT;
-            }
-            else if(uart.isStartReceived){
+            if(uart.isStartReceived){
                 uart.isStartReceived = false;
                 chart.showStartReceived(true);
+            }
+            else if(chart.isUserWantGoBack()){
+                chart.finish();
+                Log.d(TAG, "disconnect called:"+state);
+                state = State.CONNECTION_LOST;
+                Log.d(TAG, "set state to:"+state);
+                uart.setConnect(false);
+                uart.Disconnect();
             }
             else if(chart.isUserWantExport()){
                 chart.userWantExport =false;
                 //TODO EXPORT DATA
-                data.exportData(lastData);
-                String fileName ="./exported_data.csv";
-                File listFile = new File(fileName);
+                String dir = "/download";
+                String fileName = "measuringData.tsv";
+                data.exportData(data.getTestData(), dir, fileName);
+                File listFile = new File(Environment.getExternalStorageDirectory() + "/" + dir,fileName);
                 if(listFile.exists()) {
                     Intent intentShareFile = new Intent(Intent.ACTION_SEND);
-                    intentShareFile.setType(URLConnection.guessContentTypeFromName(listFile.getName()));
+                    //Log.d(TAG,URLConnection.guessContentTypeFromName(listFile.getName()));
+                    intentShareFile.setType("text/*");
                     intentShareFile.putExtra(Intent.EXTRA_STREAM,
                             Uri.parse("file://" + listFile.getAbsolutePath()));
                     ActivityStore.get("chart").startActivity(Intent.createChooser(intentShareFile, "Share File"));
@@ -261,6 +278,9 @@ public class Engine extends AsyncTask  {
                     if(oldState!=State.CONNECTION_LOST){
                         uart.setConnect(true);
                     }
+                    else{
+                        uart.setConnect(false);
+                    }
                     state = State.CONNECT;
                 }
                 break;
@@ -278,7 +298,7 @@ public class Engine extends AsyncTask  {
             case CONNECTED:
                 if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED) {
                     DEVICE_NAME = uart.getSavedDevice();
-                    Log.d(TAG,"Device_Name="+DEVICE_NAME);
+                    //Log.d(TAG,"Device_Name="+DEVICE_NAME);
                     display = true;
                     state = State.READ_DATA;
                 }
@@ -334,7 +354,7 @@ public class Engine extends AsyncTask  {
         }
         publishProgress("");
         if (state != oldState) {
-            Log.v(TAG, "state:" + state);
+            Log.v(TAG, "old state:"+oldState+"state:" + state);
             oldState = state;
 
         }
@@ -365,12 +385,22 @@ public class Engine extends AsyncTask  {
         return ret;
     }
 
-    public void connectDisconnect(){
-        uart.connectDisconnect();
+
+
+
+    public void setDisplayOrientation(int orientation) {
+        displayOrientation = orientation;
     }
 
+    public int getDisplayOrientation() {
+        return displayOrientation;
+    }
 
+    public void setUserRotated(boolean b) {
+        userHasRotated = b;
+    }
 
-
-
+    public void setDisplayReady(boolean b) {
+        isDisplayReady = b;
+    }
 }

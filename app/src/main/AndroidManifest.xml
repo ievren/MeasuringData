@@ -49,7 +49,7 @@
 
         <activity
             android:name=".ui.ChartActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:configChanges="keyboardHidden|screenSize"
             android:label="@string/title_activity_chart"
             android:launchMode="singleTop"
             android:parentActivityName=".ui.UartActivity"

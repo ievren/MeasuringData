@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String dir = "/download";
+                String fileName = "measuringData.tsv";
                 //Snackbar.make(view, "Data seved to " + getPackageResourcePath() + "...", Snackbar.LENGTH_LONG)
                 //        .setAction("Action", null).show();
                 Context context = getApplicationContext();
@@ -63,12 +66,12 @@ public class MainActivity extends AppCompatActivity {
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
                 /////
 
-                data.exportData(data.getTestData());
-                String fileName ="measuringData.tsv";
-                File listFile = new File(fileName);
+                data.exportData(data.getTestData(), dir, fileName);
+                File listFile = new File(Environment.getExternalStorageDirectory() + "/" + dir,fileName);
                 if(listFile.exists()) {
                     Intent intentShareFile = new Intent(Intent.ACTION_SEND);
-                    intentShareFile.setType(URLConnection.guessContentTypeFromName(listFile.getName()));
+                    Log.d(TAG,URLConnection.guessContentTypeFromName(listFile.getName()));
+                    intentShareFile.setType("text/*");
                     intentShareFile.putExtra(Intent.EXTRA_STREAM,
                             Uri.parse("file://" + listFile.getAbsolutePath()));
                     startActivity(Intent.createChooser(intentShareFile, "Share File"));
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         uartIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         uartIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         uartIntent.putExtra("keep", false);
-        //startActivity(uartIntent);
+        startActivity(uartIntent);
 
         mainIntent = new Intent(MainActivity.this, MainActivity.class);
         settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -104,17 +107,14 @@ public class MainActivity extends AppCompatActivity {
         IntentStore.get("main");
 
 
-//FIXME Test Export Data
-//DEBUG---------------------
-
         data = new Data();
-        //engine = new Engine(this);
+        engine = new Engine(this);
         Log.d(TAG,"engine:"+engine);
-        //engine.setChart((ChartActivity) ActivityStore.get("chart"));
-        //engine.setData(data);
-        //engine.setRun(true);
+        engine.setChart((ChartActivity) ActivityStore.get("chart"));
+        engine.setData(data);
+        engine.setRun(true);
         Log.d(TAG, "set Run true");
-        //engine.execute();
+        engine.execute();
 
 
         //engine.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -177,4 +177,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG,"onStop");
+        finish();
+    }
 }

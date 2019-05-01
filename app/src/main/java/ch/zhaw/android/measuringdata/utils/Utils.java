@@ -23,6 +23,7 @@
 package ch.zhaw.android.measuringdata.utils;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -66,7 +67,7 @@ public class Utils {
 	 * @return True if permissions are already granted, false otherwise.
 	 */
 	public static boolean isStoragePermissionsGranted(@NonNull final Context context) {
-		return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+		return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 				== PackageManager.PERMISSION_GRANTED;
 	}
 
@@ -147,5 +148,34 @@ public class Utils {
 
 	public static boolean isMarshmallowOrAbove() {
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+	}
+
+	@TargetApi(Build.VERSION_CODES.M)
+	public boolean CheckStoragePermission(@NonNull final Context context) {
+		int permissionCheckRead = ContextCompat.checkSelfPermission(context,
+				Manifest.permission.READ_EXTERNAL_STORAGE);
+		if (permissionCheckRead != PackageManager.PERMISSION_GRANTED) {
+			if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
+					Manifest.permission.READ_EXTERNAL_STORAGE)) {
+				// Show an expanation to the user *asynchronously* -- don't block
+				// this thread waiting for the user's response! After the user
+				// sees the explanation, try again to request the permission.
+				ActivityCompat.requestPermissions((Activity) context,
+						new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+						1);
+			} else {
+				// No explanation needed, we can request the permission.
+
+				ActivityCompat.requestPermissions((Activity) context,
+						new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+						1);
+
+				// MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+				// app-defined int constant. The callback method gets the
+				// result of the request.
+			}
+			return false;
+		} else
+			return true;
 	}
 }

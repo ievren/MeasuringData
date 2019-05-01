@@ -13,6 +13,15 @@
             android:key="check_box_relative_y_axes"
             android:title="Y-Axis dynamic" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="limit_line_max"
+            android:title="Limit Line Max" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="limit_line_preForce"
+            android:title="Limit Line Pre Force" />
+
     </PreferenceCategory>
 
 

@@ -23,7 +23,7 @@ public class Data {
     final static int TOTALPACKAGES=4;
     final static float FREQUENCE_Hz = 333; //Abtastrate
 
-    float count=1;
+    int count=1;
     //
     int[][] rxData;
     ArrayList<Entry> dataList=new ArrayList();
@@ -68,11 +68,11 @@ public class Data {
                 int c=(a+b);
                 z++;
                 rxData[i][(j) / 2] = c;
-                Log.d(TAG,"c(z):"+c+"("+z+")");
-                log += String.format("[%d, %d]=%d ", i, ((j) / 2),  rxData[(i)][(j) / 2]); // rxdata & 0xFFFF -> unsigned
+                //Log.d(TAG,"c(z):"+c+"("+z+")");
+                //log += String.format("[%d, %d]=%d ", i, ((j) / 2),  rxData[(i)][(j) / 2]); // rxdata & 0xFFFF -> unsigned
             }
-            Log.d(TAG, "data:" + log);
-            log = "";
+            //Log.d(TAG, "data:" + log);
+            //log = "";
         }
 
 
@@ -107,10 +107,6 @@ public class Data {
     public ArrayList<Entry> getEmptyList(){
         ArrayList<Entry> dataVals = new ArrayList();
         dataVals.add(new Entry(0,0));
-        //dataVals.add(new Entry(500,100));
-        //dataVals.add(new Entry(1000,500));
-        //dataVals.add(new Entry(1500,100));
-        //dataVals.add(new Entry(2000,100));
         return dataVals;
 
     }
@@ -119,15 +115,16 @@ public class Data {
 
     //FIXME ADDING EXPORT-FUNCTION
     //Save chart data
-    public void exportData(ArrayList<Entry> lastData) {
+    public void exportData(ArrayList<Entry> lastData, String dir, String FileName) {
         Log.d(TAG,"export called:"+lastData.get(1));
         File root = android.os.Environment.getExternalStorageDirectory();
         Log.d(TAG,"\nExternal file system root: "+root);
         FileWriteHandle fileWriteHandle = new FileWriteHandle();
-        fileWriteHandle.open("/download","measuringData.tsv", false);
-        fileWriteHandle.writeFile("Time[s]\tForce[N]");
+        fileWriteHandle.open(dir,FileName, false);
+        fileWriteHandle.writeFile("Time[ms]\tForce[N]\n");
         for (int n = 0; n < lastData.size(); n++) {
-            fileWriteHandle.writeFile(lastData.get(n).toString());
+            String line = ""+lastData.get(n).getX()+"\t"+lastData.get(n).getY()+"\n";
+            fileWriteHandle.writeFile(line);
         }
         fileWriteHandle.close();
 
@@ -135,10 +132,6 @@ public class Data {
 
 
     public ArrayList<Entry> getTestData(){
-        count+=.1;
-        if(count==3.0){
-            count=1;
-        }
         ArrayList<Entry> dataVals = new ArrayList();
         dataVals.add(new Entry(0,20*count));
         dataVals.add(new Entry(50,40*count));

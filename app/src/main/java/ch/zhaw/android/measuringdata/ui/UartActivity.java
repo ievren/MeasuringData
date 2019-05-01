@@ -43,6 +43,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -111,7 +112,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
 
     public static  boolean isConnectionLost = false;
-    public boolean isConnect = false;
+    private boolean isConnect = false;
     public boolean isStartReceived = false;
 
     private boolean userWantCloseApp=false;
@@ -167,6 +168,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 }
                 else {
                     if (btnConnectDisconnect.getText().equals("Connect")){
+                        Log.d(TAG,"onClick "+btnConnectDisconnect.getText());
                         isConnect = true;
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
                         // Autoconnect to saved_device
@@ -188,6 +190,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                                 startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                                 retryCount++;
                             }
+                            isConnect = false;
                         }
                     } else {
                         //Disconnect button pressed
@@ -271,11 +274,13 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     }
 
     public void setConnect(boolean val) {
+        Log.d(TAG, "setConnect called ->"+val);
         isConnect=val;
         if(isConnect ==true) {
             bindBtService();
             connectDisconnect();
         }
+
     }
 
     @NonNull
@@ -295,7 +300,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
     //Fixme AutoConnect
     public void connectDisconnect (){
-
         //Check Permissions
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -313,12 +317,50 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 if(mState !=UART_PROFILE_CONNECTED){
                     isConnect=true;
                     if (deviceActivity == null) {
+                        Log.d(TAG, "connectDisscont called-> open DeviceList");
                         Intent newIntent = new Intent(UartActivity.this, DeviceListActivity.class);
                         //Using SharedPreferences for getting saved device
                         newIntent.putExtra("STORED_DEVICE", saved_device);
                         startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
                     }
                 }
+            } else {
+                //Disconnect button pressed
+                if (mDevice!=null)
+                {
+                    Log.d(TAG, "connectDisconnect:"+isConnect);
+                    isConnect=false;
+                    mService.disconnect();
+                }
+            }
+        }
+    }
+
+    public void Disconnect (){
+        //Check Permissions
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) permissonContext, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            Log.i(TAG, "UART Activity started: Asked for permission");
+            return;
+        }
+        if (!mBtAdapter.isEnabled()) {
+            Log.i(TAG, "onClick - BT not enabled yet");
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        }
+        else {
+            if(mState !=UART_PROFILE_CONNECTED){
+                if (deviceActivity == null) {
+                    try {
+                        Log.d(TAG, "connectDisconnect:"+isConnect);
+                        isConnect=false;
+                        mService.disconnect();
+                    }catch (Exception e) {
+                        Log.e(TAG, e.toString());
+                    }
+                }
+
             } else {
                 //Disconnect button pressed
                 if (mDevice!=null)
@@ -445,7 +487,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                                 for (int i = 0; i < rxValue.length; i++) {
                                     sb.append(String.format("%02X ", rxValue[i]));
                                 }
-                                Log.d(TAG, "receivedDataLength:" + rxValue.length + "receivedData:" + sb);
+                                //Log.d(TAG, "receivedDataLength:" + rxValue.length + "receivedData:" + sb);
                                 Log.d(TAG, "packecount:" + packagecount);
                                 String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                                 //listAdapter.add("["+currentDateTimeString+"] Pckg:"+packagecount+"RX: "+sb.toString());
@@ -503,7 +545,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
     }
 
-    private void clearDevice(){
+    public void clearDevice(){
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         //sharedPreferences.edit().remove(DEVICE).commit();
@@ -511,18 +553,27 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     }
 
     private void saveDevice(String deviceAddress) {
+        //SP -> is editable in SettingsFrame
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         //sharedPreferences.edit().remove(DEVICE).commit();
         sharedPreferences.edit().clear().commit();
 
+        String deviceName = mDevice.getName();
         editor.putString(DEVICE, deviceAddress);
-        editor.putString(DEVICE_Name, mDevice.getName());
+        editor.putString(DEVICE_Name, deviceName);
         editor.apply();
-        Toast.makeText(this, mDevice.getName()+" saved", Toast.LENGTH_SHORT).show();
+        SP.edit().putString("edit_saved_device", deviceName).apply();
+        Toast.makeText(this, deviceName+" saved", Toast.LENGTH_SHORT).show();
     }
 
     public void loadDevice() {
+        //FIXME Get Device Adress from String -> Settings Editable
+        //SP -> is editable in SettingsFrame
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         saved_device = sharedPreferences.getString(DEVICE, "");
         Log.d(TAG, "Stored Device is:"+saved_device);
@@ -570,7 +621,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         Log.d(TAG, "onDestroy()");
 
         try {
-                //Stop already unbind Service
+            //Stop already unbind Service
             unbindService(mServiceConnection);
             mService.stopSelf();
             mService= null;
@@ -587,7 +638,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
-       //unbindService(mServiceConnection);
+        //unbindService(mServiceConnection);
         //btServiceBound = false;
     }
 
