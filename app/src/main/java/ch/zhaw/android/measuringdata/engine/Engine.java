@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import ch.zhaw.android.measuringdata.ui.ChartActivity;
 import ch.zhaw.android.measuringdata.data.Data;
 import ch.zhaw.android.measuringdata.ui.UartActivity;
 import ch.zhaw.android.measuringdata.IntentStore;
+import ch.zhaw.android.measuringdata.utils.Utils;
 
 enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY, CONNECTION_LOST, EXIT}
 
@@ -41,7 +43,7 @@ public class Engine extends AsyncTask  {
     Intent chartIntent;
     Intent uartIntent;
     Intent mainIntent;
-
+    Utils utils;
     Data data;
 
     boolean display=false;
@@ -187,22 +189,32 @@ public class Engine extends AsyncTask  {
             }
             else if(chart.isUserWantExport()){
                 chart.userWantExport =false;
+                //Context context = ActivityStore.get("main").getApplicationContext();
                 //TODO EXPORT DATA
+
                 String dir = "/download";
-                String fileName = "measuringData.tsv";
-                data.exportData(data.getTestData(), dir, fileName);
+                String fileName = "measuringData.csv";
+                data.exportData(lastData, dir, fileName, DEVICE_NAME);
                 File listFile = new File(Environment.getExternalStorageDirectory() + "/" + dir,fileName);
                 if(listFile.exists()) {
                     Intent intentShareFile = new Intent(Intent.ACTION_SEND);
                     //Log.d(TAG,URLConnection.guessContentTypeFromName(listFile.getName()));
                     intentShareFile.setType("text/*");
+                    // Added because Android 9 -> exposed beyond app through ClipData.Item.getUri()
+                    StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                    StrictMode.setVmPolicy(builder.build());
+                    // --End Android 9 -->
                     intentShareFile.putExtra(Intent.EXTRA_STREAM,
                             Uri.parse("file://" + listFile.getAbsolutePath()));
                     ActivityStore.get("chart").startActivity(Intent.createChooser(intentShareFile, "Share File"));
                 }
-                else {
+                if (!listFile.exists()) {
                     Toast.makeText(context, "Couldnt export data", Toast.LENGTH_SHORT).show();
                 }
+
+
+
+
 
             }
         }

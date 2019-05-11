@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
                 /////
 
+                /** Debug Test File Write
                 data.exportData(data.getTestData(), dir, fileName);
                 File listFile = new File(Environment.getExternalStorageDirectory() + "/" + dir,fileName);
                 if(listFile.exists()) {
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     Toast.makeText(context, "Couldnt export data", Toast.LENGTH_SHORT).show();
                 }
+                 */
 
 
 
@@ -181,6 +183,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(TAG,"onStop");
+        if(getEngine()!=null) {
+            getEngine().setRun(false);
+        }
         finish();
     }
 }

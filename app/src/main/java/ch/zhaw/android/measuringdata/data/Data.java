@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import ch.zhaw.android.measuringdata.utils.FileWriteHandle;
@@ -115,15 +117,19 @@ public class Data {
 
     //FIXME ADDING EXPORT-FUNCTION
     //Save chart data
-    public void exportData(ArrayList<Entry> lastData, String dir, String FileName) {
+    public void exportData(ArrayList<Entry> lastData, String dir, String fileName, String device) {
         Log.d(TAG,"export called:"+lastData.get(1));
         File root = android.os.Environment.getExternalStorageDirectory();
         Log.d(TAG,"\nExternal file system root: "+root);
         FileWriteHandle fileWriteHandle = new FileWriteHandle();
-        fileWriteHandle.open(dir,FileName, false);
-        fileWriteHandle.writeFile("Time[ms]\tForce[N]\n");
+        fileWriteHandle.open(dir,fileName, false);
+        String seperator = ";";
+        String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+        fileWriteHandle.writeFile("Device:"+seperator+device+"\n");
+        fileWriteHandle.writeFile("Measuring Data from:"+seperator+currentDateTimeString+"\n");
+        fileWriteHandle.writeFile("Time[s]"+seperator+"Force[N]\n");
         for (int n = 0; n < lastData.size(); n++) {
-            String line = ""+lastData.get(n).getX()+"\t"+lastData.get(n).getY()+"\n";
+            String line = ""+lastData.get(n).getX()+seperator+lastData.get(n).getY()+"\n";
             fileWriteHandle.writeFile(line);
         }
         fileWriteHandle.close();
