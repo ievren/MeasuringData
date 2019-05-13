@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -71,8 +72,7 @@ public class ChartActivity extends AppCompatActivity {
     public boolean userWantExport=false;
     boolean displayHasRotated = false;
 
-    static Random nr = new Random();
-    static String TAG="ChartActivity"+nr.nextInt(10);
+    static String TAG="ChartActivity";
     public static final int DISPLAY = 101;
 
     ArrayList<Entry> lastData;
@@ -106,7 +106,7 @@ public class ChartActivity extends AppCompatActivity {
         boolean keep = chartIntent.getExtras().getBoolean("keep");
         Log.d(TAG, "Created...,keep:"+keep);
         if(keep==true){
-            if(ActivityStore.get("uart")==null){
+            if(ActivityStore.get("activity_uart")==null){
                 this.finish();
             }
             else if(main == null){
@@ -244,7 +244,7 @@ public class ChartActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        if(ActivityStore.get("uart")==null){
+        if(ActivityStore.get("activity_uart")==null){
             this.finish();
         }
         else if(main == null){
@@ -288,6 +288,19 @@ public class ChartActivity extends AppCompatActivity {
         userWantGoBack = true;
     }
 
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        //Todo when home Button pressed ->
+        //if(getEngine()!=null) {
+        //    getEngine().setRun(false);
+        //}
+        //finish();
+        userWantGoBack = true;
+        Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+
+    }
 
     @Override
     protected void onStop() {
@@ -479,12 +492,12 @@ public class ChartActivity extends AppCompatActivity {
                 if(data.size()>100) {
                     preForce = getPreForce(data);
                     if(preForce!=0){
-                        LimitLine lower_limit = new LimitLine(preForce, "Pre Force:"+preForce);
+                        LimitLine lower_limit = new LimitLine(preForce, "Pre Force: "+preForce);
                         lower_limit.setLineWidth(4f);
                         lower_limit.setLineColor(getResources().getColor(R.color.colorPrimaryDark));
                         lower_limit.enableDashedLine(10f, 10f, 0f);
                         lower_limit.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_TOP);
-                        lower_limit.setTextSize(10f);
+                        lower_limit.setTextSize(12f);
                         leftAxis.addLimitLine(lower_limit);
                     }
                 }

@@ -27,8 +27,7 @@ import ch.zhaw.android.measuringdata.utils.Utils;
 enum State {IDLE, CONNECT, CONNECTED, READ_DATA, DISPLAY, CONNECTION_LOST, EXIT}
 
 public class Engine extends AsyncTask  {
-    static Random number = new Random();
-    static String TAG = "Engine"+number.nextInt(10);
+    static String TAG = "Engine";
 
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
@@ -123,7 +122,7 @@ public class Engine extends AsyncTask  {
     @Override
     protected void onProgressUpdate(Object[] values) {
         super.onProgressUpdate(values);
-        //uartIntent = IntentStore.get("uart");
+        //uartIntent = IntentStore.get("activity_uart");
         //mainIntent = IntentStore.get("main");
         chartIntent = IntentStore.get("chart");
         // DISPLAY
@@ -256,10 +255,10 @@ public class Engine extends AsyncTask  {
             }
         }
         if (uart == null) {
-            uart = (UartActivity) ActivityStore.get("uart");
+            uart = (UartActivity) ActivityStore.get("activity_uart");
         } else {
-            if (uart != ActivityStore.get("uart")) {
-                uart = (UartActivity) ActivityStore.get("uart");
+            if (uart != ActivityStore.get("activity_uart")) {
+                uart = (UartActivity) ActivityStore.get("activity_uart");
             }
         }
 
@@ -357,7 +356,7 @@ public class Engine extends AsyncTask  {
                 }
                 if(uart != null){
                     uart.finish();
-                    Log.d(TAG, "uart.cancel");
+                    Log.d(TAG, "activity_uart.cancel");
                 }
                 main.closeApp();
                 Log.d(TAG, "main.cancel");

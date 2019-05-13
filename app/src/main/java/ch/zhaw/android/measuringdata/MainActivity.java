@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
         IntentStore.put("main",mainIntent);
         IntentStore.put("chart",chartIntent);
-        IntentStore.put("uart",uartIntent);
+        IntentStore.put("activity_uart",uartIntent);
         IntentStore.put("settings",settingsIntent);
         IntentStore.get("main");
 
@@ -183,9 +183,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(TAG,"onStop");
-        if(getEngine()!=null) {
-            getEngine().setRun(false);
-        }
-        finish();
+    }
+
+
+    @Override
+    protected void onUserLeaveHint() {
+        //Todo when home Button pressed ->
+        //if(getEngine()!=null) {
+        //    getEngine().setRun(false);
+        //}
+        //finish();
+        super.onUserLeaveHint();
+        Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
     }
 }

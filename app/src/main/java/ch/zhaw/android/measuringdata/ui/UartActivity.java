@@ -25,7 +25,6 @@ package ch.zhaw.android.measuringdata.ui;
 
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -127,7 +126,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "created...");
-        setContentView(R.layout.uart);
+        setContentView(R.layout.activity_uart);
 
         permissonContext = this;
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -232,7 +231,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         bindBtService();
 
         //connectDisconnect();
-        ActivityStore.put("uart",UartActivity.this);
+        ActivityStore.put("activity_uart",UartActivity.this);
     }
 
     public boolean onTouchEvent(MotionEvent touchEvent){
@@ -538,6 +537,18 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         intentFilter.addAction(BtService.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BtService.DEVICE_DOES_NOT_SUPPORT_UART);
         return intentFilter;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        //Todo when home Button pressed ->
+        //if(getEngine()!=null) {
+        //    getEngine().setRun(false);
+        //}
+        //finish();
+        Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+
     }
 
     private void showMessage(String msg) {

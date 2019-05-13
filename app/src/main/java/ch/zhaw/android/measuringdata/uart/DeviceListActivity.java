@@ -294,6 +294,7 @@ public class DeviceListActivity extends Activity {
         scanner.stopScan(mLeScanCallback);
         //TODO Cleanup
         //mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        finish();
 
     }
 
@@ -302,6 +303,7 @@ public class DeviceListActivity extends Activity {
         super.onDestroy();
         scanner.stopScan(mLeScanCallback);
         //mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        finish();
 
     }
 
