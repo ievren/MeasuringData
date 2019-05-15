@@ -163,10 +163,8 @@ public class ChartActivity extends AppCompatActivity {
 
 
             if (engine.getDisplayOrientation() != getResources().getConfiguration().orientation){
-                Log.d(TAG, "!>engine display:"+engine.getDisplayOrientation()+", new Orientation "+getResources().getConfiguration().orientation);
+                Log.d(TAG, "!>engine display rotated:"+engine.getDisplayOrientation()+", new Orientation "+getResources().getConfiguration().orientation);
                 displayHasRotated =true;
-
-
             }
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 engine.setDisplayOrientation(Configuration.ORIENTATION_LANDSCAPE); //2
@@ -265,8 +263,8 @@ public class ChartActivity extends AppCompatActivity {
                 }
             }
         }
+        Log.d(TAG, "set user has rotated > engine:"+displayHasRotated);
         engine.setUserRotated(displayHasRotated);
-        displayHasRotated = false;
         engine.setDisplayReady(true);
 
     }
@@ -566,6 +564,10 @@ public class ChartActivity extends AppCompatActivity {
 
     public boolean isUserWantGoBack() {
         return userWantGoBack;
+    }
+
+    public void resetUserHasRotated() {
+        displayHasRotated = false;
     }
 
 /*

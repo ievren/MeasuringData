@@ -148,8 +148,9 @@ public class Engine extends AsyncTask  {
                 }
                 //RotatedScreen
                 else if(userHasRotated==true && isDisplayReady){
-                    Log.d(TAG,"User Rotated");
+                    Log.d(TAG,"User Rotated detected");
                     userHasRotated=false;
+                    chart.resetUserHasRotated();
                     chart.getSupportActionBar().setTitle("\u2611 Connected: " + DEVICE_NAME);
                     chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
                     chart.plot(lastData);
@@ -412,6 +413,7 @@ public class Engine extends AsyncTask  {
 
     public void setUserRotated(boolean b) {
         userHasRotated = b;
+        Log.d(TAG,"User rotated: "+b);
     }
 
     public void setDisplayReady(boolean b) {
