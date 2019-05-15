@@ -13,17 +13,14 @@
 
 
     <style name="Widget" />
-
     <style name="Widget.ScannerSubtitle">
         <item name="android:textColor">?android:textColorSecondary</item>
         <item name="android:textStyle">bold</item>
     </style>
 
-    <color name="black">#000000</color>
-    <color name="whitegrey">#FFF2F2F2</color>
+
     <!-- AlertDialog text color fix thanks to Shawn Castrianni, see: http://groups.google.com/group/android-developers/browse_thread/thread/f0b34621d3a70c4b -->
     <style name="DialogLight" parent="@android:style/Theme.Dialog">
-
         <item name="android:windowBackground">@color/whitegrey</item>
         <item name="android:textColor">@color/black</item>
 
@@ -32,6 +29,7 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
