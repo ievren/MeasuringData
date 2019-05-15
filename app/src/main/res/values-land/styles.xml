@@ -20,7 +20,7 @@
 
 
     <!-- AlertDialog text color fix thanks to Shawn Castrianni, see: http://groups.google.com/group/android-developers/browse_thread/thread/f0b34621d3a70c4b -->
-    <style name="DialogLight" parent="@android:style/Theme.Dialog">
+    <style name="DialogLight" parent="android:Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@color/whitegrey</item>
         <item name="android:textColor">@color/black</item>
 

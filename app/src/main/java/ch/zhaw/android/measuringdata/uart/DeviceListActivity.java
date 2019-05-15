@@ -23,6 +23,7 @@
 package ch.zhaw.android.measuringdata.uart;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -52,6 +53,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +83,7 @@ public class DeviceListActivity extends Activity {
 
     // private BluetoothAdapter mBtAdapter
     private TextView mEmptyList;
+    private ProgressBar mScanningProgress;
     public static final String TAG = "DeviceListActivity";
 
     List<BluetoothDevice> deviceList;
@@ -138,6 +141,7 @@ public class DeviceListActivity extends Activity {
         }
         populateList();
         mEmptyList = findViewById(R.id.empty);
+        mScanningProgress = findViewById(R.id.state_scanning);
         Button cancelButton = findViewById(R.id.btn_cancel);
         cancelButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -160,7 +164,6 @@ public class DeviceListActivity extends Activity {
         ListView newDevicesListView = findViewById(R.id.new_devices);
         newDevicesListView.setAdapter(deviceAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
-
         scanLeDevice(true, SCAN_PERIOD);
 
     }
@@ -272,6 +275,7 @@ public class DeviceListActivity extends Activity {
         if (!deviceFound) {
             deviceList.add(device);
             mEmptyList.setVisibility(View.GONE);
+            mScanningProgress.setVisibility(View.GONE);
             deviceAdapter.notifyDataSetChanged();
         }
     }
@@ -358,6 +362,7 @@ public class DeviceListActivity extends Activity {
             return position;
         }
 
+        @SuppressLint("ResourceAsColor")
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewGroup vg;
@@ -377,27 +382,27 @@ public class DeviceListActivity extends Activity {
             tvrssi.setVisibility(View.VISIBLE);
             byte rssival = (byte) devRssiValues.get(device.getAddress()).intValue();
             if (rssival != 0) {
-                tvrssi.setText("Rssi = " + String.valueOf(rssival));
+                tvrssi.setText("Signal: " + String.valueOf((int) (100.0f * (127.0f + rssival) / (127.0f + 20.0f)) ));
             }
 
             tvname.setText(device.getName());
             tvadd.setText(device.getAddress());
             if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
                 Log.i(TAG, "device::"+device.getName());
-                tvname.setTextColor(Color.WHITE);
-                tvadd.setTextColor(Color.WHITE);
+                tvname.setTextColor(R.color.colorAccent);
+                tvadd.setTextColor(R.color.colorAccent);
                 tvpaired.setTextColor(Color.GRAY);
                 tvpaired.setVisibility(View.VISIBLE);
                 tvpaired.setText(R.string.paired);
                 tvrssi.setVisibility(View.VISIBLE);
-                tvrssi.setTextColor(Color.WHITE);
+                tvrssi.setTextColor(R.color.colorAccent);
 
             } else {
-                tvname.setTextColor(Color.WHITE);
-                tvadd.setTextColor(Color.WHITE);
+                tvname.setTextColor(R.color.colorAccent);
+                tvadd.setTextColor(R.color.colorAccent);
                 tvpaired.setVisibility(View.GONE);
                 tvrssi.setVisibility(View.VISIBLE);
-                tvrssi.setTextColor(Color.WHITE);
+                tvrssi.setTextColor(R.color.colorAccent);
             }
             return vg;
         }

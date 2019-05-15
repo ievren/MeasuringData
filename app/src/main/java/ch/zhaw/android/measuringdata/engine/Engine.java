@@ -183,6 +183,7 @@ public class Engine extends AsyncTask  {
             //Close App
             else if(chart.isUserWantGoBack()){
                 chart.finish();
+                display = false;
                 Log.d(TAG, "disconnect called:"+state);
                 state = State.CONNECTION_LOST;
                 Log.d(TAG, "set state to:"+state);

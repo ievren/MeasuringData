@@ -22,9 +22,11 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -46,32 +48,44 @@
 
         <ListView
             android:id="@+id/new_devices"
+            style="@android:style/Widget.Holo.Light.ListView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="2"
-            android:paddingBottom="@dimen/alert_dialog_padding_bottom"
-            android:paddingEnd="@dimen/alert_dialog_padding"
+            android:cacheColorHint="@color/colorPrimaryDark"
             android:paddingStart="@dimen/alert_dialog_padding"
             android:paddingTop="@dimen/alert_dialog_padding_top"
+            android:paddingEnd="@dimen/alert_dialog_padding"
+            android:paddingBottom="@dimen/alert_dialog_padding_bottom"
             android:stackFromBottom="true" />
 
         <TextView
             android:id="@+id/empty"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/scanning" />
+            android:text="@string/scanning"
+            android:textAlignment="center" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/state_scanning"
             style="?android:attr/progressBarStyleHorizontal"
+            tools:ignore="UnusedAttribute"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-8dp"
+            android:layout_marginBottom="-7dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/empty" />
 
         <Button
             android:id="@+id/btn_cancel"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@android:string/cancel" />
+            android:text="@android:string/cancel"
+            android:textColor="@color/colorPrimary" />
     </LinearLayout>
 </LinearLayout>

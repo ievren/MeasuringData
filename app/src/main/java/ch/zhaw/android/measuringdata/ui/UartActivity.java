@@ -180,8 +180,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 }
                 else {
                     if (btnConnectDisconnect.getText().equals("Connect")){
-                        Log.d(TAG,"onClick "+btnConnectDisconnect.getText());
                         isConnect = true;
+                        Log.d(TAG,"onClick "+btnConnectDisconnect.getText() + ", isConnect: "+isConnect + ", mState="+mState);
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
                         // Autoconnect to saved_device
                         /*try {
