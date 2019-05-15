@@ -57,6 +57,7 @@ import android.widget.Toast;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeoutException;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -426,8 +427,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                         btnConnectDisconnect.setText("Disconnect");
                         edtMessage.setEnabled(true);
                         btnSend.setEnabled(true);
-                        ((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
-                        listAdapter.add("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
+                        ((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName() + " - ready");
+                        listAdapter.add("[" + currentDateTimeString + "] Connected to: " + mDevice.getName());
                         messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
                         isConnectionLost = false;
                         mState = UART_PROFILE_CONNECTED;
@@ -447,7 +448,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                         edtMessage.setEnabled(false);
                         btnSend.setEnabled(false);
                         ((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
-                        listAdapter.add("["+currentDateTimeString+"] Disconnected to: "+ mDevice.getName());
+                        listAdapter.add("[" + currentDateTimeString + "] Disconnected to: " + mDevice.getName());
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
                         //setUiState();
@@ -463,7 +464,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             }
 
 
-
             //********************//
             if (action.equals(BtService.ACTION_DATA_AVAILABLE)) {
                 rxValue = intent.getByteArrayExtra(BtService.EXTRA_DATA);
@@ -476,15 +476,15 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                             //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                             //listAdapter.add("["+currentDateTimeString+"] RX: "+text);
                             //HEX ->
-                            if(isDataReady){
-                                Log.d(TAG,"dataNotReset");
+                            if (isDataReady) {
+                                Log.d(TAG, "dataNotReset");
                                 return;
                             }
                             //No Measuring Data -> commandData
-                            if (rxValue.length < 244){
+                            if (rxValue.length < 244) {
                                 //StartPacket
                                 packagecount = 0;
-                                if(rxValue[0] == (byte) 0x6){
+                                if (rxValue[0] == (byte) 0x6) {
                                     Log.d(TAG, "Start Byte received");
                                     isStartReceived = true;
                                 }
@@ -495,22 +495,19 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                             //Measuring DATA -> 244 length
                             if (rxValue.length == 244) {
 
-                                // TODO Check Data receiving is correct DEBUG
-                                StringBuilder sb = new StringBuilder();
-                                for (int i = 0; i < rxValue.length; i++) {
-                                    sb.append(String.format("%02X ", rxValue[i]));
-                                }
+                                Log.d(TAG, "packagecount:" + packagecount);
+                                //**** Check Data receiving is correct DEBUG ****
+                                //StringBuilder sb = new StringBuilder();
+                                //for (int i = 0; i < rxValue.length; i++) {
+                                //    sb.append(String.format("%02X ", rxValue[i]));
+                                //}
                                 //Log.d(TAG, "receivedDataLength:" + rxValue.length + "receivedData:" + sb);
-                                Log.d(TAG, "packecount:" + packagecount);
-                                String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                                //listAdapter.add("["+currentDateTimeString+"] Pckg:"+packagecount+"RX: "+sb.toString());
-                                messageListView.smoothScrollToPosition(listAdapter.getCount() - 1);
-
+                                //**** END CHECK****
 
                                 // Store the Data
-                                receivedData[packagecount-1] =  rxValue;
-                                if(packagecount>=TOTALPACKAGES) {
-                                    packagecount=0;
+                                receivedData[packagecount - 1] = rxValue;
+                                if (packagecount >= TOTALPACKAGES) {
+                                    packagecount = 0;
                                     isDataReady = true;
                                 }
                             }
@@ -529,8 +526,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                     public void run() {
                         try {
                             //Batterly Level
-                            Log.d(TAG, "Battery Level is:"+batteryLevel);
-                        }catch (Exception e) {
+                            Log.d(TAG, "Battery Level is:" + batteryLevel);
+                        } catch (Exception e) {
                             Log.e(TAG, e.toString());
                         }
                     }
@@ -538,7 +535,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             }
 
             //*********************//
-            if (action.equals(BtService.DEVICE_DOES_NOT_SUPPORT_UART)){
+            if (action.equals(BtService.DEVICE_DOES_NOT_SUPPORT_UART)) {
                 showMessage("Device doesn't support UART. Disconnecting");
                 mService.disconnect();
             }

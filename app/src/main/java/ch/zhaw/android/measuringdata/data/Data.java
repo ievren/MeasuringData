@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -91,12 +92,14 @@ public class Data {
 
     public ArrayList<Entry> getLastData() {
         String log="";
+        float[] meanAverageData= new float[rxData[0].length* TOTALPACKAGES];
         // Manipulate arriving data
         ArrayList<Entry> list = new ArrayList<>();
         int a= 1;
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-                list.add(new Entry(((a * FREQUENCE_MS)), (rxData[i][j])) ); //count * rxData[i][j]));
+                meanAverageData[a-1] =rxData[i][j];
+                //list.add(new Entry(((a * FREQUENCE_MS)), (rxData[i][j])) ); //count * rxData[i][j]));
                 //log += String.format("[%f, %f], ", (float) ((a * FREQUENCE_MS)),  (int)(rxData[i][j]) ); // rxdata & 0xFFFF -> unsigned
                 a++;
 
@@ -104,6 +107,19 @@ public class Data {
         }
         a=0;
         //Log.d(TAG, "plot:" + log);
+
+        //******Moving-Average Filter*****
+        // #list is our input data
+        //int period = (int) (0.1/FREQUENCE_MS);
+        int period = 15;
+        MeanAverageFilter obj = new MeanAverageFilter(period);
+        for (int i = 0; i< meanAverageData.length; i++) {
+            obj.addData(meanAverageData[i]);
+            double meanRounded = (double) Math.round(obj.getMean() * 100) / 100;
+            System.out.println("New number added is " + meanAverageData[i] + ", SMA = " + meanRounded);
+            list.add(new Entry(((i * FREQUENCE_MS)), (float) (meanRounded))); //count * rxData[i][j]));
+        }
+
         return list;
     }
 

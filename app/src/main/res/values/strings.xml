@@ -142,6 +142,6 @@
     <string name="not_available">n/a</string>
     <string name="battery">%d%%</string>
     <string name="force_n">Force [N]</string>
-    <string name="time_in_s">Time in [s]</string>
+    <string name="time_in_s">Time [s]</string>
     <string name="logo_description">background logo</string>
 </resources>

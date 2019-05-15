@@ -484,8 +484,11 @@ public class ChartActivity extends AppCompatActivity {
         LineData lineData = new LineData(dataSets);
         lineDataSet1.notifyDataSetChanged();
 
-        lineDataSet1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        //lineDataSet1.setCubicIntensity(0.5f);
+        // Cubic Line
+        lineDataSet1.setMode(LineDataSet.Mode.LINEAR);
+        //lineDataSet1.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
+        //lineDataSet1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        //lineDataSet1.setCubicIntensity(1f);
 
         //get MAX
         if(maxLimitSetting){
