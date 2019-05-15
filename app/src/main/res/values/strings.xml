@@ -139,4 +139,9 @@
     <string name="title_activity_display">DisplayActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_test_settings2">Settings</string>
+    <string name="not_available">n/a</string>
+    <string name="battery">%d%%</string>
+    <string name="force_n">Force [N]</string>
+    <string name="time_in_s">Time in [s]</string>
+    <string name="logo_description">background logo</string>
 </resources>

@@ -172,12 +172,14 @@ public class Engine extends AsyncTask  {
 
         }
 
-        //Close App
+
         else if(chart != null ){
+            //showStart Measurement in ChartActivity
             if(uart.isStartReceived){
                 uart.isStartReceived = false;
                 chart.showStartReceived(true);
             }
+            //Close App
             else if(chart.isUserWantGoBack()){
                 chart.finish();
                 Log.d(TAG, "disconnect called:"+state);
@@ -186,6 +188,7 @@ public class Engine extends AsyncTask  {
                 uart.setConnect(false);
                 uart.Disconnect();
             }
+            //Export in ChartActivity
             else if(chart.isUserWantExport()){
                 chart.userWantExport =false;
                 //Context context = ActivityStore.get("main").getApplicationContext();

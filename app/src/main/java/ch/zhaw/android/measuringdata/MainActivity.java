@@ -194,6 +194,6 @@ public class MainActivity extends AppCompatActivity {
         //}
         //finish();
         super.onUserLeaveHint();
-        Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
     }
 }

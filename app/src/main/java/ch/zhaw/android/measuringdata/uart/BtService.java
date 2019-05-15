@@ -73,9 +73,14 @@ public class BtService extends Service {
             "com.nordicsemi.nrfUART.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "com.nordicsemi.nrfUART.EXTRA_DATA";
+    //Added for Battery Level
+    public final static String BATTERY_LEVEL =
+            "com.nordicsemi.nrfUART.BATTERY_LEVEL";
+    public final static String ACTION_BATTERY_AVAILABLE =
+            "com.nordicsemi.nrfUART.ACTION_BATTERY_AVAILABLE";
     public final static String DEVICE_DOES_NOT_SUPPORT_UART =
             "com.nordicsemi.nrfUART.DEVICE_DOES_NOT_SUPPORT_UART";
-    
+
     public static final UUID TX_POWER_UUID = UUID.fromString("00001804-0000-1000-8000-00805f9b34fb");
     public static final UUID TX_POWER_LEVEL_UUID = UUID.fromString("00002a07-0000-1000-8000-00805f9b34fb");
     public static final UUID CCCD = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
@@ -84,15 +89,18 @@ public class BtService extends Service {
     public static final UUID UART_SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     public static final UUID RX_CHAR_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
     public static final UUID TX_CHAR_UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
-    
-   
+
+    //FIXME Battery
+    public static final UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
+    public static final UUID BATTERY_LEVEL_CHAR_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
+
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
-            
+
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
@@ -114,7 +122,7 @@ public class BtService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
             	Log.w(TAG, "mBluetoothGatt = " + mBluetoothGatt );
-            	
+
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -126,16 +134,39 @@ public class BtService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                if(characteristic.getUuid().equals(TX_CHAR_UUID)) {
+                    Log.d(TAG,"TX_CHAR_UUID onCharacteristicRead");
+                    broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                }
+                else if(characteristic.getUuid().equals(BATTERY_LEVEL_CHAR_UUID)) {
+                    Log.d(TAG,"batteryLevel onCharacteristicRead");
+                    broadcastUpdate(ACTION_BATTERY_AVAILABLE, characteristic);
+                }
             }
         }
+
+
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            if(characteristic.getUuid().equals(TX_CHAR_UUID)) {
+                Log.d(TAG,"TX_CHAR_UUID onCharacteristicChanged");
+                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            }
+            else if(characteristic.equals(BATTERY_LEVEL_CHAR_UUID)){
+                Log.d(TAG,"BATTERY_LEVEL_CHAR_UUID onCharacteristicChanged");
+                broadcastUpdate(ACTION_BATTERY_AVAILABLE, characteristic);
+            }
         }
+
+
+
     };
+
+
+
+
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
@@ -148,11 +179,15 @@ public class BtService extends Service {
 
         // This is handling for the notification on TX Character of NUS service
         if (TX_CHAR_UUID.equals(characteristic.getUuid())) {
-        	
            // Log.d(TAG, String.format("Received TX: %d",characteristic.getValue() ));
             intent.putExtra(EXTRA_DATA, characteristic.getValue());
-        } else {
-        	
+        }
+        else if (BATTERY_LEVEL_CHAR_UUID.equals(characteristic.getUuid())) {
+            Log.d(TAG, "BATTERY_LEVEL_CHAR_UUID:"+characteristic.getValue());
+            intent.putExtra(BATTERY_LEVEL, characteristic.getValue());
+        }
+        else {
+            Log.d(TAG, "other Char_UUID"+characteristic.getUuid()+", value:"+characteristic.getValue());
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
@@ -295,11 +330,11 @@ public class BtService extends Service {
      *
 
     */
-    
+
     /**
      * Enable Notification on TX characteristic
      *
-     * @return 
+     * @return
      */
     public void enableTXNotification()
     { 
@@ -323,17 +358,45 @@ public class BtService extends Service {
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(TxChar,true);
-        
+
         BluetoothGattDescriptor descriptor = TxChar.getDescriptor(CCCD);
+        Log.d(TAG, "descriptor: "+descriptor.getCharacteristic().getUuid());
         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
         mBluetoothGatt.writeDescriptor(descriptor);
-    	
     }
-    
+
+    /**
+     * Enable Notification on BATTERY characteristic
+     *
+     * @return
+     */
+    public void enableBATTERYNotification()
+    {
+    	BluetoothGattService BatService = mBluetoothGatt.getService(BATTERY_SERVICE);
+        if (BatService == null) {
+            showMessage("Battery service not found!");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
+        }
+        BluetoothGattCharacteristic BatLevelChar = BatService.getCharacteristic(BATTERY_LEVEL_CHAR_UUID);
+        if (BatLevelChar == null) {
+            showMessage("BatteryLevel charateristic not found!");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
+        }
+        mBluetoothGatt.setCharacteristicNotification(BatLevelChar,true);
+
+
+
+        BluetoothGattDescriptor descriptor2 = BatLevelChar.getDescriptor(CCCD);
+        Log.d(TAG, "descriptor2: "+descriptor2.getCharacteristic().getUuid());
+        descriptor2.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mBluetoothGatt.writeDescriptor(descriptor2);
+
+    }
+
     public void writeRXCharacteristic(byte[] value)
     {
-    
-    	
     	BluetoothGattService RxService = mBluetoothGatt.getService(UART_SERVICE_UUID);
     	showMessage("mBluetoothGatt null"+ mBluetoothGatt);
     	if (RxService == null) {
@@ -349,10 +412,10 @@ public class BtService extends Service {
         }
         RxChar.setValue(value);
     	boolean status = mBluetoothGatt.writeCharacteristic(RxChar);
-    	
+
         Log.d(TAG, "write TXchar - status=" + status);
     }
-    
+
     private void showMessage(String msg) {
         Log.e(TAG, msg);
     }

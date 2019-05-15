@@ -117,6 +117,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     private boolean userWantCloseApp=false;
     private boolean isDataReady;
     private int packagecount=0;
+    private String batteryLevel;
     private byte[] rxValue;     //
     private byte[][]receivedData;   // [packagecount][received Data]
 
@@ -127,6 +128,17 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         super.onCreate(savedInstanceState);
         Log.d(TAG, "created...");
         setContentView(R.layout.activity_uart);
+
+        //Added because Engine gets called from MainActivity -> After Home Button -> destroy this
+        if (!isTaskRoot()) {
+            final Intent intent = getIntent();
+            final String intentAction = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
+                    intentAction != null && intentAction.equals(Intent.ACTION_MAIN)) {
+                Log.d(TAG, "!isTaskRoot -> finished");
+                finish();
+            }
+        }
 
         permissonContext = this;
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -401,7 +413,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     };
 
     private final BroadcastReceiver UARTStatusChangeReceiver = new BroadcastReceiver() {
-
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
@@ -440,8 +451,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                         mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
                         //setUiState();
-
-
                     }
                 });
             }
@@ -450,8 +459,12 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             //*********************//
             if (action.equals(BtService.ACTION_GATT_SERVICES_DISCOVERED)) {
                 mService.enableTXNotification();
+                mService.enableBATTERYNotification();
             }
-            //*********************//
+
+
+
+            //********************//
             if (action.equals(BtService.ACTION_DATA_AVAILABLE)) {
                 rxValue = intent.getByteArrayExtra(BtService.EXTRA_DATA);
                 packagecount++;
@@ -478,6 +491,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
                             }
 
+                            //FIXME if after Start Command no Data comes exit
                             //Measuring DATA -> 244 length
                             if (rxValue.length == 244) {
 
@@ -500,15 +514,29 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                                     isDataReady = true;
                                 }
                             }
-
-
-
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
                         }
                     }
                 });
             }
+
+            //*********************//
+            if (action.equals(BtService.ACTION_BATTERY_AVAILABLE)) {
+                batteryLevel = intent.getStringExtra(BtService.BATTERY_LEVEL);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            //Batterly Level
+                            Log.d(TAG, "Battery Level is:"+batteryLevel);
+                        }catch (Exception e) {
+                            Log.e(TAG, e.toString());
+                        }
+                    }
+                });
+            }
+
             //*********************//
             if (action.equals(BtService.DEVICE_DOES_NOT_SUPPORT_UART)){
                 showMessage("Device doesn't support UART. Disconnecting");
@@ -518,6 +546,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
         }
     };
+
+
 
     private void broadcast_init() {
         if (btServiceBound){
@@ -535,20 +565,9 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         intentFilter.addAction(BtService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BtService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BtService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BtService.ACTION_BATTERY_AVAILABLE);
         intentFilter.addAction(BtService.DEVICE_DOES_NOT_SUPPORT_UART);
         return intentFilter;
-    }
-
-    @Override
-    protected void onUserLeaveHint() {
-        super.onUserLeaveHint();
-        //Todo when home Button pressed ->
-        //if(getEngine()!=null) {
-        //    getEngine().setRun(false);
-        //}
-        //finish();
-        Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
-
     }
 
     private void showMessage(String msg) {
@@ -604,10 +623,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         return;
     }
 
-
-
-
-
     public boolean checkBtServiceBound(){
         return btServiceBound;
     }
@@ -616,10 +631,10 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         return  userWantCloseApp;
     }
 
+
     /**
      * Activity Life-Cycle:
      */
-
     @Override
     public void onStart() {
         super.onStart();
@@ -678,6 +693,17 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     }
 
     @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        //Todo when home Button pressed ->
+        //if(getEngine()!=null) {
+        //    getEngine().setRun(false);
+        //}
+        //finish();
+        //Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
@@ -685,7 +711,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-
             case REQUEST_SELECT_DEVICE:
                 //When the DeviceListActivity return, with the selected saved_device address
                 if (resultCode == Activity.RESULT_OK && data != null) {
@@ -703,8 +728,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                         bindBtService();
                         mService.connect(deviceAddress);
                     }
-
-
                 }
                 break;
             case REQUEST_ENABLE_BT:
@@ -724,8 +747,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 break;
         }
     }
-
-
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -764,7 +785,6 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 })
                 .setNegativeButton(R.string.popup_no, null)
                 .show();
-
     }
 
 }

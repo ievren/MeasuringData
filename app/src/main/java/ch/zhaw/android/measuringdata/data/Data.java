@@ -23,7 +23,8 @@ public class Data {
 
     final static String TAG="Data";
     final static int TOTALPACKAGES=4;
-    final static float FREQUENCE_Hz = 333; //Abtastrate
+    final static float FREQUENCE_MS = 0.003f; //333Hz Abtastrate
+
 
     int count=1;
     //
@@ -95,8 +96,8 @@ public class Data {
         int a= 1;
         for (int i = 0; i < TOTALPACKAGES ; i++) {
             for (int j = 0; j < rxData[i].length; j++) {
-                list.add(new Entry(((a * 1/FREQUENCE_Hz)), (rxData[i][j])) ); //count * rxData[i][j]));
-                //log += String.format("[%f, %f], ", (float) ((a * 1/FREQUENCE_Hz)),  (int)(rxData[i][j]) ); // rxdata & 0xFFFF -> unsigned
+                list.add(new Entry(((a * FREQUENCE_MS)), (rxData[i][j])) ); //count * rxData[i][j]));
+                //log += String.format("[%f, %f], ", (float) ((a * FREQUENCE_MS)),  (int)(rxData[i][j]) ); // rxdata & 0xFFFF -> unsigned
                 a++;
 
             }
@@ -129,7 +130,7 @@ public class Data {
         fileWriteHandle.writeFile("Measuring Data from:"+seperator+currentDateTimeString+"\n");
         fileWriteHandle.writeFile("Time[s]"+seperator+"Force[N]\n");
         for (int n = 0; n < lastData.size(); n++) {
-            String line = ""+lastData.get(n).getX()+seperator+lastData.get(n).getY()+"\n";
+            String line = ""+String.format("%.3f",lastData.get(n).getX())+seperator+lastData.get(n).getY()+"\n";
             fileWriteHandle.writeFile(line);
         }
         fileWriteHandle.close();

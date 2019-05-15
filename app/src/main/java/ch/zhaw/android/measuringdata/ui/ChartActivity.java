@@ -3,6 +3,7 @@ package ch.zhaw.android.measuringdata.ui;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,6 +38,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
@@ -86,6 +88,7 @@ public class ChartActivity extends AppCompatActivity {
     SharedPreferences SP = null;
 
     String deviceName= "";
+    Toolbar batteryLevelToolbar;
     int     yAxisMaxValue = 500;
     boolean xAxisDynamic = false;
     boolean yAxisDynamic = false;
@@ -128,6 +131,7 @@ public class ChartActivity extends AppCompatActivity {
             //Load settings
             loadSettings();
 
+            batteryLevelToolbar = findViewById(R.id.batteryToolbar);
             toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -297,8 +301,8 @@ public class ChartActivity extends AppCompatActivity {
         //    getEngine().setRun(false);
         //}
         //finish();
-        userWantGoBack = true;
-        Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+        //userWantGoBack = true;
+        //Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
 
     }
 
@@ -361,6 +365,12 @@ public class ChartActivity extends AppCompatActivity {
             return true;
     }
 
+//    FIXME Battery
+//    @Override
+//    public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+//        runOnUiThread(() -> batteryLevelToolbar.setTitle(getString(R.string.battery, batteryLevel)));
+//    }
+
 
 
     private void loadSettings() {
@@ -396,11 +406,11 @@ public class ChartActivity extends AppCompatActivity {
 
     public int getDetectedPeak(ArrayList<Entry> data) {
         int ret = 0;
-        int threshold = 20;
+        int threshold = 10;
         boolean isPeak = false;
-        for (int n = 0; (n < data.size() - 1) && !isPeak; n++) {
+        for (int n = 0; (n < data.size() - 10) && !isPeak; n++) {
             float value = data.get(n).getY();
-            float delta = data.get(n + 1).getY() - data.get(n).getY();
+            float delta = data.get(n + 10).getY() - data.get(n).getY();
             if (delta > 0 && delta > threshold) {
                 System.out.println("Start Peak is "+data.get(n).getY()+" at:" + data.get(n).getX());
                 isPeak = true;
@@ -410,8 +420,13 @@ public class ChartActivity extends AppCompatActivity {
         return ret;
     }
 
-    public float getMax(LineData lineData){
-        float maxYData = (int) (Math.ceil(lineData.getYMax()));
+    /**
+     * Return the max Y-Value of LineData
+     * @param lineData
+     * @return maxYData
+     */
+    public int getMax(LineData lineData){
+        int maxYData = (int) Math.ceil(lineData.getYMax());
         return maxYData;
     }
 
@@ -425,20 +440,22 @@ public class ChartActivity extends AppCompatActivity {
      * @param data
      * @return index before the peek Starts
      */
-    public float getPreForce(ArrayList<Entry> data){
-        float ret=0;
+    public int getPreForce(ArrayList<Entry> data){
+        int ret = 0;
+        int size = 4;
         int window = 50;
         int peakAt = getDetectedPeak(data);
-        if(peakAt-(3*window) > 0) {
-            Log.d(TAG,"peakAt:"+data.get(peakAt-(2*window)).getX()+","+data.get(peakAt-(2*window)).getY());
-            for (int n = peakAt - (3 * window); n < peakAt - window; n++) {
+        if(peakAt-(size*window) > 0) {
+            Log.d(TAG,"peakAt:"+data.get(peakAt-(size*window)).getX()+","+data.get(peakAt-(size*window)).getY());
+            for (int n = peakAt - (size * window); n < peakAt - window; n++) {
                 //Log.d(TAG,"avg of:"+data.get(n).getX()+","+data.get(n).getY());
                 ret += data.get(n).getY();
 
             }
-            ret = ret / (2*window);
+            ret = ret / ((size-1)*window);
             //Log.d(TAG,"PreForce"+ret);
         }
+        ret = (int) Math.ceil(ret);
         return ret;
     }
 
@@ -453,11 +470,10 @@ public class ChartActivity extends AppCompatActivity {
             resetChart();
         }
         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-        float maxValue = 0;
-        float preForce = 0;
+        int maxValue = 0;
+        int preForce = 0;
 
         //MP-LineChart
-
         LineDataSet lineDataSet1 = new LineDataSet(data, "Messung von:   "+currentDateTimeString);
         lineDataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
         lineDataSet1.setDrawCircles(false);
@@ -480,7 +496,7 @@ public class ChartActivity extends AppCompatActivity {
             max_limit.setLineColor(Color.RED);
             max_limit.setLineWidth(4f);
             max_limit.setTextColor(Color.BLACK);
-            max_limit.setTextSize(12f);
+            max_limit.setTextSize(20f);
             leftAxis.addLimitLine(max_limit);
 
         }
