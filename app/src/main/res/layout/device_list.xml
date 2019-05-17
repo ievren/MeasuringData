@@ -46,13 +46,15 @@
             android:text="@string/scanner_permission_rationale"
             android:visibility="gone"/>
 
+        <!--android:id="@+id/new_devices"-->
         <ListView
-            android:id="@+id/new_devices"
-            style="@android:style/Widget.Holo.Light.ListView"
+            android:id="@android:id/list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="2"
             android:cacheColorHint="@color/colorPrimaryDark"
+            android:divider="@color/black"
+            android:dividerHeight="2dp"
             android:paddingStart="@dimen/alert_dialog_padding"
             android:paddingTop="@dimen/alert_dialog_padding_top"
             android:paddingEnd="@dimen/alert_dialog_padding"

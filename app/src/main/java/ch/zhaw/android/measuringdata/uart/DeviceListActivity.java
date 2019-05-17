@@ -35,6 +35,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.PaintDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -89,7 +90,7 @@ public class DeviceListActivity extends Activity {
     List<BluetoothDevice> deviceList;
     private DeviceAdapter deviceAdapter;
     Map<String, Integer> devRssiValues;
-    public static final long SCAN_PERIOD = 20000; //scanning for 10 seconds
+    public static final long SCAN_PERIOD = 20000; //scanning for 20 seconds
     private Handler mHandler;
     private boolean mScanning;
 
@@ -161,9 +162,10 @@ public class DeviceListActivity extends Activity {
         deviceAdapter = new DeviceAdapter(this, deviceList);
         devRssiValues = new HashMap<String, Integer>();
 
-        ListView newDevicesListView = findViewById(R.id.new_devices);
+        ListView newDevicesListView = findViewById(android.R.id.list);
         newDevicesListView.setAdapter(deviceAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
+
         scanLeDevice(true, SCAN_PERIOD);
 
     }
@@ -219,10 +221,17 @@ public class DeviceListActivity extends Activity {
                                       return;
                                   }
                                   if ( uuids.contains(FILTER_UUID) ) {
-                                      Log.d(TAG,"ParcelUIIDS:"+uuids.contains(FILTER_UUID)+" Device: "+result.getDevice().getName());
-                                      Log.d(TAG,"Adress:"+result.getDevice().getAddress());
-                                      Log.d(TAG,"autoConnectDevice:"+autoConnectDevice);
+                                      //Log.d(TAG,"ParcelUIIDS:"+uuids.contains(FILTER_UUID)+" Device: "+result.getDevice().getName());
+                                      //Log.d(TAG,"Adress:"+result.getDevice().getAddress());
+                                      //Log.d(TAG,"autoConnectDevice:"+autoConnectDevice);
+                                      //Log.d(TAG,"rssi:"+result.getRssi());
+                                      //Log.d(TAG,"TxPower:"+result.getTxPower());
+                                      ListView newDevicesListView = (ListView) findViewById(android.R.id.list);
+                                      newDevicesListView.setDivider(getResources().getDrawable(R.drawable.divider));
+                                      newDevicesListView.setDividerHeight(2);
+
                                       addDevice(result.getDevice(), result.getRssi());
+
                                   }
 
                                   if (result.getDevice().getAddress().equals(autoConnectDevice)) {
@@ -277,6 +286,7 @@ public class DeviceListActivity extends Activity {
             mEmptyList.setVisibility(View.GONE);
             mScanningProgress.setVisibility(View.GONE);
             deviceAdapter.notifyDataSetChanged();
+
         }
     }
 
@@ -382,13 +392,13 @@ public class DeviceListActivity extends Activity {
             tvrssi.setVisibility(View.VISIBLE);
             byte rssival = (byte) devRssiValues.get(device.getAddress()).intValue();
             if (rssival != 0) {
-                tvrssi.setText("Signal: " + String.valueOf((int) (100.0f * (127.0f + rssival) / (127.0f + 20.0f)) ));
+                tvrssi.setText("Signal: " + String.valueOf((int) (100.0f * (127.0f + rssival) / (127.0f + 20.0f)) ) + " %");
             }
 
             tvname.setText(device.getName());
             tvadd.setText(device.getAddress());
             if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                Log.i(TAG, "device::"+device.getName());
+                Log.d(TAG, "device::"+device.getName() + ", uuids:" + device.getUuids());
                 tvname.setTextColor(R.color.colorAccent);
                 tvadd.setTextColor(R.color.colorAccent);
                 tvpaired.setTextColor(Color.GRAY);
