@@ -14,7 +14,6 @@ import com.github.mikephil.charting.data.Entry;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 
 import ch.zhaw.android.measuringdata.ActivityStore;
 import ch.zhaw.android.measuringdata.MainActivity;
@@ -154,14 +153,16 @@ public class Engine extends AsyncTask  {
                     chart.getSupportActionBar().setTitle("\u2611 Connected: " + DEVICE_NAME);
                     chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
                     chart.plot(lastData);
+                    Log.d(TAG, "Battery level is->"+uart.getBatteryLevel());
+                    chart.showBatteryLevel(uart.getBatteryLevel());
                     display = false;
                 }
                 else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED && isDisplayReady) {
                     Log.d(TAG, "Connected to:" + DEVICE_NAME);
-                    display = false;
                     chart.getSupportActionBar().setTitle("\u2611 Connected: " + DEVICE_NAME);
                     chart.toolbar.setTitleTextColor(Color.rgb(50, 205, 50));
                     chart.plot(lastData);
+                    display = false;
                 }
                 else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED && isDisplayReady){
                     chart.getSupportActionBar().setTitle("\u2612 Disconnected");
@@ -175,8 +176,15 @@ public class Engine extends AsyncTask  {
 
 
         else if(chart != null ){
-            //showStart Measurement in ChartActivity
-            if(uart.isStartReceived){
+            //show the Battery Value as value % in chart Activity
+            if(uart.isBatteryLevelAvailable){
+                uart.isBatteryLevelAvailable = false;
+                Log.d(TAG, "Battery level is->"+uart.getBatteryLevel());
+                chart.showBatteryLevel(uart.getBatteryLevel());
+
+            }
+            //show a Start Measurement Window in ChartActivity
+            else if(uart.isStartReceived){
                 uart.isStartReceived = false;
                 chart.showStartReceived(true);
             }

@@ -70,6 +70,9 @@ import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
 import ch.zhaw.android.measuringdata.uart.DeviceListActivity;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.parseUnsignedInt;
+
 public class UartActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
     public static final String TAG = UartActivity.class.getSimpleName();
 
@@ -114,13 +117,14 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     public static  boolean isConnectionLost = false;
     private boolean isConnect = false;
     public boolean isStartReceived = false;
+    public boolean isBatteryLevelAvailable = false;
 
     private boolean userWantCloseApp=false;
     private boolean isDataReady;
     private int packagecount=0;
-    private String batteryLevel;
     private byte[] rxValue;     //
     private byte[][]receivedData;   // [packagecount][received Data]
+    public String batteryLevel = "n/a";
 
     float x1,x2,y1,y2;
 
@@ -460,7 +464,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             //*********************//
             if (action.equals(BtService.ACTION_GATT_SERVICES_DISCOVERED)) {
                 mService.enableTXNotification();
-                mService.enableBATTERYNotification();
+                // -> cant enable like this, using onDescriptorWrite after enable TXNotification()
+                // mService.enableBATTERYNotification();
             }
 
 
@@ -520,13 +525,15 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
             //*********************//
             if (action.equals(BtService.ACTION_BATTERY_AVAILABLE)) {
-                batteryLevel = intent.getStringExtra(BtService.BATTERY_LEVEL);
+                batteryLevel =  intent.getStringExtra(BtService.BATTERY_LEVEL);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             //Batterly Level
-                            Log.d(TAG, "Battery Level is:" + batteryLevel);
+                            String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+                                Log.d(TAG, ""+"["+currentDateTimeString+"] RX: "+ batteryLevel);
+                                isBatteryLevelAvailable = true;
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
                         }
@@ -784,4 +791,9 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 .show();
     }
 
+    public String getBatteryLevel() {
+        String ret ="";
+        ret = batteryLevel;
+        return ret;
+    }
 }

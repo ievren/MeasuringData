@@ -573,6 +573,11 @@ public class ChartActivity extends AppCompatActivity {
         displayHasRotated = false;
     }
 
+    public void showBatteryLevel(String batteryLevel) {
+        batteryLevelToolbar = (Toolbar) findViewById(R.id.batteryToolbar);
+        batteryLevelToolbar.setTitle(""+batteryLevel+"%");
+    }
+
 /*
     public boolean onTouchEvent(MotionEvent touchEvent){
         switch(touchEvent.getAction()){

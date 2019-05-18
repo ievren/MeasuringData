@@ -116,7 +116,7 @@ public class Data {
         for (int i = 0; i< meanAverageData.length; i++) {
             obj.addData(meanAverageData[i]);
             double meanRounded = (double) Math.round(obj.getMean() * 100) / 100;
-            System.out.println("New number added is " + meanAverageData[i] + ", SMA = " + meanRounded);
+            //System.out.println("New number added is " + meanAverageData[i] + ", SMA = " + meanRounded);
             list.add(new Entry(((i * FREQUENCE_MS)), (float) (meanRounded))); //count * rxData[i][j]));
         }
 
