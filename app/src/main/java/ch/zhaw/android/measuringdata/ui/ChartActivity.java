@@ -76,6 +76,7 @@ public class ChartActivity extends AppCompatActivity {
 
     static String TAG="ChartActivity";
     public static final int DISPLAY = 101;
+    boolean isHomePressed = false;
 
     ArrayList<Entry> lastData;
     LineChart mpLineChart;
@@ -224,9 +225,15 @@ public class ChartActivity extends AppCompatActivity {
             //Todo testing Settings
             case  R.id.action_settings:
                 Log.d(String.valueOf(this), "Menu Item clicked->Settings");
-                Intent test_intent = new Intent(ChartActivity.this,
+                Intent settings_intent = new Intent(ChartActivity.this,
                         SettingsActivity.class);
-                startActivity(test_intent);
+                startActivity(settings_intent);
+                return false;
+            case  R.id.action_about:
+                Log.d(String.valueOf(this), "Menu Item clicked->About");
+                Intent about_intent = new Intent(ChartActivity.this,
+                        AboutActivity.class);
+                startActivity(about_intent);
                 return false;
             case android.R.id.home:
                 this.onBackPressed();
@@ -288,6 +295,7 @@ public class ChartActivity extends AppCompatActivity {
     public void onBackPressed() {
         Log.d(TAG,"onBack pressed");
         userWantGoBack = true;
+        isHomePressed = false;
     }
 
 
@@ -301,7 +309,17 @@ public class ChartActivity extends AppCompatActivity {
         //finish();
         //userWantGoBack = true;
         //Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+    }
 
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        //Todo when home Button pressed ->
+        if (level == TRIM_MEMORY_UI_HIDDEN) {
+            isHomePressed = true;
+            Log.d(TAG, "Home Button pressed");
+            //notifyBackground();
+        }
     }
 
     @Override

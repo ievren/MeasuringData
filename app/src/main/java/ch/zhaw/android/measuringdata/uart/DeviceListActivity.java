@@ -148,8 +148,12 @@ public class DeviceListActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if (mScanning==false) scanLeDevice(true, SCAN_PERIOD);
-                else finish();
+                if (mScanning==false){
+                    scanLeDevice(true, SCAN_PERIOD);
+                }
+                else {
+                    finish();
+                }
             }
         });
 
@@ -181,9 +185,18 @@ public class DeviceListActivity extends Activity {
                     scanner.stopScan(mLeScanCallback);
                     //mBluetoothAdapter.stopLeScan(mLeScanCallback);
                     cancelButton.setText(R.string.scan);
+                    mScanningProgress.setVisibility(View.GONE);
+                    mEmptyList.setVisibility(View.GONE);
+
                 }
             }, t_scan_period);
             mScanning = true;
+            if(mScanningProgress!=null) {
+                mScanningProgress.setVisibility(View.VISIBLE);
+            }
+            if(mEmptyList!=null){
+                mEmptyList.setVisibility(View.VISIBLE);
+            }
             scanner.startScan(mLeScanCallback);
             //TODO TEST with Filter
             //mBluetoothAdapter.startLeScan(mLeScanCallback);

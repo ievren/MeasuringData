@@ -65,6 +65,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import ch.zhaw.android.measuringdata.ActivityStore;
+import ch.zhaw.android.measuringdata.IntentStore;
+import ch.zhaw.android.measuringdata.MainActivity;
 import ch.zhaw.android.measuringdata.R;
 import ch.zhaw.android.measuringdata.engine.Engine;
 import ch.zhaw.android.measuringdata.uart.BtService;
@@ -97,6 +99,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
     DeviceListActivity deviceActivity;
 
+    MainActivity main;
     Engine engine;
     private int retryCount = 0;
     private int mState = UART_PROFILE_DISCONNECTED;
@@ -118,6 +121,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     private boolean isConnect = false;
     public boolean isStartReceived = false;
     public boolean isBatteryLevelAvailable = false;
+    public boolean isBackground = true;
 
     private boolean userWantCloseApp=false;
     private boolean isDataReady;
@@ -133,6 +137,20 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         super.onCreate(savedInstanceState);
         Log.d(TAG, "created...");
         setContentView(R.layout.activity_uart);
+        if(main == null) {
+            main = (MainActivity) ActivityStore.get("main");
+            //Log.d(TAG,"main:"+main);
+            engine = main.getEngine();
+            //Log.d(TAG,"engine:"+engine);
+            if (engine == null) {
+                //FIXME on Home Button pressed -> close Bluetooth connection
+                reRunApp();
+            } else {
+                if (engine.getIsAppClosing()) {
+                    this.finish();
+                }
+            }
+        }
 
         //Added because Engine gets called from MainActivity -> After Home Button -> destroy this
         if (!isTaskRoot()) {
@@ -263,6 +281,10 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                 if(x1 < x2){
                     //SwipeLeft detected
                     Log.d(TAG,"Swipe-LEFT");
+                    Log.d(String.valueOf(this), "Menu swipe left->About");
+                    Intent about_intent = new Intent(UartActivity.this,
+                            AboutActivity.class);
+                    startActivity(about_intent);
                     //Intent i = new Intent(MainActivity.this, SwipeLeft.class);
                     //startActivity(i);
                 }else if(x1 > x2){
@@ -532,8 +554,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
                         try {
                             //Batterly Level
                             String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-                                Log.d(TAG, ""+"["+currentDateTimeString+"] RX: "+ batteryLevel);
-                                isBatteryLevelAvailable = true;
+                            Log.d(TAG, ""+"["+currentDateTimeString+"] RX: "+ batteryLevel);
+                            isBatteryLevelAvailable = true;
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
                         }
@@ -635,6 +657,18 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         return  userWantCloseApp;
     }
 
+    public static void forceRunApp(Context context, String packageApp){
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageApp);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(launchIntent);
+    }
+
+    private void reRunApp() {
+        Context context = getApplicationContext();
+        Log.d(TAG, "Rerun App");
+        forceRunApp(context, "ch.zhaw.android.measuringdata");
+    }
+
 
     /**
      * Activity Life-Cycle:
@@ -693,18 +727,54 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
+        if(main == null) {
+            main = (MainActivity) ActivityStore.get("main");
+            //Log.d(TAG,"main:"+main);
+            engine = main.getEngine();
+            //Log.d(TAG,"engine:"+engine);
+            if (engine == null) {
+                //FIXME on Home Button pressed -> close Bluetooth connection
+                Log.d(TAG, "Rerun App");
+                reRunApp();
+            } else {
+                if (engine.getIsAppClosing()) {
+                    this.finish();
+                }
+            }
+        }
 
     }
 
     @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
-        //Todo when home Button pressed ->
+        //Todo when home Button pressed -> Didnt work tested...
         //if(getEngine()!=null) {
         //    getEngine().setRun(false);
         //}
         //finish();
         //Toast.makeText(this, TAG+" User pressed Home Button", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        //Todo when home Button pressed ->
+        if (level == TRIM_MEMORY_UI_HIDDEN) {
+            isBackground = true;
+            Log.d(TAG, "Home Button pressed");
+            //notifyBackground();
+            try {
+                //Stop already unbind Service
+                unbindService(mServiceConnection);
+                mService.stopSelf();
+                mService= null;
+                btServiceBound = false;
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(UARTStatusChangeReceiver);
+            } catch (Exception ignore) {
+                Log.e(TAG, ignore.toString());
+            }
+        }
     }
 
     @Override

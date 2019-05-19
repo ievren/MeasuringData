@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/app_icon_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity android:name=".ui.AboutActivity"></activity>
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -24,6 +24,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,9 +33,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -42,9 +45,7 @@
             android:name=".uart.DeviceListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/select_device"
-            android:theme="@style/DialogLight"/>
-
-
+            android:theme="@style/DialogLight" />
         <activity
             android:name=".ui.ChartActivity"
             android:configChanges="keyboardHidden|screenSize"
@@ -55,13 +56,16 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.zhaw.android.measuringdata.ui.UartActivity" />
+            <intent-filter>
+                <action android:name="android.intent.action.RUN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.SettingsActivity"
-            android:theme="@style/AppTheme.SlidrActivityTheme"
-            android:parentActivityName=".ui.ChartActivity">
-        </activity>
-
+            android:parentActivityName=".ui.ChartActivity"
+            android:theme="@style/AppTheme.SlidrActivityTheme"></activity>
 
         <service
             android:name=".uart.BtService"
