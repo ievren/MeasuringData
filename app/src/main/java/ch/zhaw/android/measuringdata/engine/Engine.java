@@ -44,6 +44,7 @@ public class Engine extends AsyncTask  {
     Utils utils;
     Data data;
 
+    boolean closeApp = false;
     boolean isFirstConnection = true;
     boolean isDisplayConnectedTo = false;
     boolean display=false;
@@ -140,7 +141,7 @@ public class Engine extends AsyncTask  {
                     Log.d(TAG,"User want close app detected");
                     state = State.EXIT;
                 }
-                if (state == State.IDLE || isFirstConnection){
+                else if (state == State.IDLE || isFirstConnection){
                     isFirstConnection = false;
                     display = false;
                     Log.d(TAG,"plot EmptyData");
@@ -148,7 +149,7 @@ public class Engine extends AsyncTask  {
                     chart.plot(lastData);
                 }
                 //RotatedScreen
-                if(userHasRotated==true && isDisplayReady){
+                else if(userHasRotated==true && isDisplayReady){
                     Log.d(TAG,"User Rotated detected");
                     userHasRotated=false;
                     chart.resetUserHasRotated();
@@ -159,7 +160,7 @@ public class Engine extends AsyncTask  {
                     chart.showBatteryLevel(uart.getBatteryLevel());
                     display = false;
                 }
-                if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED && isDisplayReady) {
+                else if (uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED && isDisplayReady) {
                     Log.d(TAG, "isFirstConn"+isFirstConnection);
                     if(!isDisplayConnectedTo) {
                         isDisplayConnectedTo = true;
@@ -170,7 +171,7 @@ public class Engine extends AsyncTask  {
                     chart.plot(lastData);
                     display = false;
                 }
-                if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED && isDisplayReady){
+                else if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED && isDisplayReady){
                     chart.getSupportActionBar().setTitle("\u2612 Disconnected");
                     chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
                 }
@@ -244,13 +245,14 @@ public class Engine extends AsyncTask  {
                 chart.toolbar.setTitleTextColor(Color.rgb(244,144,66));
             }
             if(uart.isUserWantCloseApp()) {
+                Log.d(TAG, "Close App");
                 state = State.EXIT;
             }
-            if(uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED && isFirstConnection ){
+            else if(uart.checkConnectionEstablished() == UART_PROFILE_CONNECTED && isFirstConnection ){
                 isFirstConnection = false;
                 //state = State.CONNECTED;
             }
-            if(uart.isConnectionLost()){
+            else if(uart.isConnectionLost()){
                 if( chart != null) {
                     //Log.d(TAG, "isConnectionLost:" + uart.isConnectionLost());
                     chart.getSupportActionBar().setTitle("\u2612 Disconnected");
@@ -311,6 +313,7 @@ public class Engine extends AsyncTask  {
                 if (uart != null) {
                     delay = 0;
                     if(oldState==State.CONNECTION_LOST || isFirstConnection){
+                        Log.d(TAG, "state:"+state+", -> Idle uart setConnect");
                         // Auto Connect -> will tell uart to Connect to Last saved Device
                         uart.setConnect(true);
                     }
