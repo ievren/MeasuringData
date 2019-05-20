@@ -404,6 +404,7 @@ public class ChartActivity extends AppCompatActivity {
         //mpLineChart = (LineChart) findViewById(R.id.line_chart);
         mpLineChart = (LineChart) lineChartView;
         mpLineChart.setBackgroundColor(getResources().getColor(R.color.rotLogo_white));
+        mpLineChart.setScaleEnabled(false);
         //Configure Axis
         rightYAxis = mpLineChart.getAxisRight();
         rightYAxis.setEnabled(false);

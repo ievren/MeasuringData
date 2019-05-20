@@ -363,13 +363,14 @@ public class Engine extends AsyncTask  {
                 // see onProgressUpdate
                 state = State.CONNECTED;
                 //}
-                if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED){
-                    state = State.IDLE;
-                }
                 break;
             case CONNECTION_LOST:
+                display = false;
                 isDisplayConnectedTo = false;
-                if(delay > 20){
+                if(chart!=null){
+                    chart.finish();
+                }
+                if(delay > 10){
                     delay = 0;
                     state = State.IDLE;
                 }
