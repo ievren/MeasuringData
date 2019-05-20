@@ -202,7 +202,7 @@ public class Engine extends AsyncTask  {
                 chart.finish();
                 display = false;
                 Log.d(TAG, "disconnect called:"+state);
-                state = State.CONNECTION_LOST;
+                state = State.IDLE;
                 Log.d(TAG, "set state to:"+state);
                 uart.setConnect(false);
                 uart.Disconnect();
@@ -257,7 +257,8 @@ public class Engine extends AsyncTask  {
                     chart.toolbar.setTitleTextColor(Color.rgb(244, 144, 66));
                     chart.finish();
                 }
-                //state = State.IDLE;
+                isFirstConnection = true;
+                state = State.CONNECTION_LOST;
 
             }
 
@@ -309,10 +310,9 @@ public class Engine extends AsyncTask  {
                 }
                 if (uart != null) {
                     delay = 0;
-                    if(oldState!=State.CONNECTION_LOST && isFirstConnection){
+                    if(oldState==State.CONNECTION_LOST || isFirstConnection){
                         // Auto Connect -> will tell uart to Connect to Last saved Device
                         uart.setConnect(true);
-                        isFirstConnection =true;
                     }
                     else{
                         uart.setConnect(false);
@@ -341,7 +341,7 @@ public class Engine extends AsyncTask  {
                 else {
                     if(delay > 2) {
                         delay = 0;
-                        state = State.IDLE;
+                        state = State.CONNECTION_LOST;
                     }
                 }
 
@@ -355,7 +355,7 @@ public class Engine extends AsyncTask  {
                     state = State.DISPLAY;
                 }
                 if(uart.checkConnectionEstablished() == UART_PROFILE_DISCONNECTED){
-                    state = State.IDLE;
+                    state = State.CONNECTION_LOST;
                 }
                 break;
             case DISPLAY:

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Measuring Data</string>
+    <string name="app_name">FMS\nForce Measurement System</string>
     <string name="action_settings">Settings</string>
     <string name="action_chart">TestChartActivity</string>
 

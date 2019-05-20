@@ -95,7 +95,7 @@ public class BtService extends Service {
     public List<BluetoothGattCharacteristic> chars = new ArrayList<>();
     boolean isBatteryWriteDeskriptorSuccess;
     boolean isTXWriteDeskriptorSuccess;
-    boolean isFirstRun = false;
+    boolean isFirstRun = true;
 
     public static final UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
     public static final UUID BATTERY_LEVEL_CHAR_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
@@ -153,10 +153,7 @@ public class BtService extends Service {
             }
         }
 
-        //To Read BatteryCharacteristic ->
-        public void requestCharacteristics(BluetoothGatt gatt) {
-            gatt.readCharacteristic(chars.get(0));
-        }
+
 
 
         @Override
@@ -195,10 +192,10 @@ public class BtService extends Service {
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorWrite(gatt, descriptor, status);
             Log.d(TAG, "First Run?:"+isFirstRun);
-            if(!isFirstRun){
-                isFirstRun = true;
+            if(isFirstRun){
+                isFirstRun = false;
                 //get Battery Level at Start -> afterwards we are using Notification
-                requestCharacteristics(gatt);
+                readCharacteristic(chars.get(0));
             }
             Log.d(TAG, "isTXWriteDeskriptorSuccess"+isTXWriteDeskriptorSuccess+", isBatteryWriteDeskriptorSuccess"+isBatteryWriteDeskriptorSuccess);
             if (isTXWriteDeskriptorSuccess && !isBatteryWriteDeskriptorSuccess ) {
@@ -226,9 +223,6 @@ public class BtService extends Service {
 
 
     };
-
-
-
 
 
     private void broadcastUpdate(final String action) {
@@ -276,6 +270,22 @@ public class BtService extends Service {
     }
 
 
+    /**
+     * Read Battery Characteristic
+     *
+     */
+    //To Read BatteryCharacteristic ->
+    public void requestBatteryCharacteristics() {
+        if(mBluetoothGatt!=null){
+            try{
+                Log.d(TAG, "requestBatteryCharacteristics");
+                readCharacteristic(chars.get(0));
+            }catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        }
+
+    }
 
     /**
      * Initializes a reference to the local Bluetooth adapter.
@@ -370,6 +380,7 @@ public class BtService extends Service {
             return;
         }
         Log.w(TAG, "mBluetoothGatt closed");
+        isFirstRun = true;
         mBluetoothDeviceAddress = null;
         mBluetoothGatt.close();
         mBluetoothGatt = null;

@@ -57,6 +57,7 @@ import android.widget.Toast;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import androidx.annotation.NonNull;
@@ -491,6 +492,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             //*********************//
             if (action.equals(BtService.ACTION_GATT_SERVICES_DISCOVERED)) {
                 mService.enableTXNotification();
+                mService.requestBatteryCharacteristics();
                 // -> cant enable like this, using onDescriptorWrite after enable TXNotification()
                 // mService.enableBATTERYNotification();
             }
