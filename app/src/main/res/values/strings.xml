@@ -145,4 +145,9 @@
     <string name="time_in_s">Time [s]</string>
     <string name="logo_description">background logo</string>
     <string name="action_about">About</string>
+    <string name="text_about">
+        This application is part of a Bachelor thesis at the Zuercher Hochschule for Applied Science.\n
+        Created in spring term 2019 by Ibrahim Evren and Darius Eckhardt developed the application for their thesis.\n
+        Supervisor for the thesis was Prof. Dr. Juan-Mario Gruber from the Institue of Embedded Systems.
+    </string>
 </resources>

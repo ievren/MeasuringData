@@ -356,6 +356,8 @@ public class BtService extends Service {
             return;
         }
         mBluetoothGatt.disconnect();
+        isTXWriteDeskriptorSuccess =false;
+        isBatteryWriteDeskriptorSuccess =false;
         // mBluetoothGatt.close();
     }
 

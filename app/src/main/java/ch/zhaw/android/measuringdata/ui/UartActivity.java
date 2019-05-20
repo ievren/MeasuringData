@@ -96,6 +96,8 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     public static int DATALENGTH=244;
     public static int TOTALPACKAGES=4;
 
+    public static int TIMEOUT = 10*60; //After 5 min no Data Transfered Disconnect
+
 
     DeviceListActivity deviceActivity;
 
@@ -124,7 +126,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     public boolean isBackground = true;
 
     private boolean userWantCloseApp=false;
-    private boolean isDataReady;
+    private boolean isDataReady = false;
     private int packagecount=0;
     private byte[] rxValue;     //
     private byte[][]receivedData;   // [packagecount][received Data]
@@ -139,11 +141,14 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         setContentView(R.layout.activity_uart);
         if(main == null) {
             main = (MainActivity) ActivityStore.get("main");
-            //Log.d(TAG,"main:"+main);
-            engine = main.getEngine();
+            Log.d(TAG,"main:"+main);
+            if(main!=null) {
+                engine = main.getEngine();
+            }
             //Log.d(TAG,"engine:"+engine);
             if (engine == null) {
                 //FIXME on Home Button pressed -> close Bluetooth connection
+                Log.d(TAG, "Rerun App");
                 reRunApp();
             } else {
                 if (engine.getIsAppClosing()) {
@@ -533,9 +538,13 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
 
                                 // Store the Data
                                 receivedData[packagecount - 1] = rxValue;
-                                if (packagecount >= TOTALPACKAGES) {
+                                if (packagecount == TOTALPACKAGES) {
                                     packagecount = 0;
                                     isDataReady = true;
+                                }
+                                else{
+                                    isDataReady = false;
+                                    //Log.e(TAG, "MORE PACKETS RECEIVED THAN DEFINED");
                                 }
                             }
                         } catch (Exception e) {
@@ -730,7 +739,9 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         if(main == null) {
             main = (MainActivity) ActivityStore.get("main");
             //Log.d(TAG,"main:"+main);
-            engine = main.getEngine();
+            if(main!=null) {
+                engine = main.getEngine();
+            }
             //Log.d(TAG,"engine:"+engine);
             if (engine == null) {
                 //FIXME on Home Button pressed -> close Bluetooth connection
@@ -763,6 +774,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         if (level == TRIM_MEMORY_UI_HIDDEN) {
             isBackground = true;
             Log.d(TAG, "Home Button pressed");
+            userWantCloseApp = true;
             //notifyBackground();
             try {
                 //Stop already unbind Service
