@@ -32,5 +32,14 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="Saved Device" />
+
+        <SeekBarPreference
+            android:defaultValue="5"
+            android:max="10"
+            android:key="MAX_MEASUREMENTS"
+            android:title="Max Measurements to save"
+            />
+
+
     </PreferenceCategory>
 </PreferenceScreen>

@@ -44,6 +44,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -62,6 +64,7 @@ import java.util.concurrent.TimeoutException;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -116,6 +119,7 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
     private Button btnSend;
     private EditText edtMessage;
     private Context permissonContext;
+    public Toolbar toolbar;
     private static String saved_device;
 
 
@@ -169,6 +173,11 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
             }
         }
 
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("FMS");
+        
         permissonContext = this;
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter == null) {
@@ -680,6 +689,27 @@ public class UartActivity extends AppCompatActivity implements RadioGroup.OnChec
         forceRunApp(context, "ch.zhaw.android.measuringdata");
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()) {
+            case  R.id.action_about:
+                Log.d(String.valueOf(this), "Menu Item clicked->About");
+                Intent about_intent = new Intent(UartActivity.this,
+                        AboutActivity.class);
+                startActivity(about_intent);
+                return false;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chart, menu);
+        menu.removeItem(R.id.action_settings);
+        menu.findItem(R.id.action_about);
+        return true;
+    }
 
     /**
      * Activity Life-Cycle:
