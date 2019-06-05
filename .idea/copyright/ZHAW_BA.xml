@@ -1,0 +1,6 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="notice" value="Zuercher Hochschule fuer Angewandte Wissenschaften (ZHAW)&#10;School of Engineering (SoE)&#10;InES Institut of Embedded Systems&#10;&#10;  Bachelorarbeit BA19_gruj_10&#10;  Projekt FMS&#10;  Darius Eckhardt (eckhadar)&#10;  Ibrahim Evren   (evrenibr)&#10;  &#10;  07.06.2019, Winterthur Switzerland&#10;&#10;  This Software is based on the ble_app_uart, SDK Version 15.2.0&#10;  It has been modified to fit the needs of the Project FMS&#10;  For correct functionality this Software has to be placed into the same folder as the SDK.&#10;" />
+    <option name="myName" value="ZHAW BA" />
+  </copyright>
+</component>
