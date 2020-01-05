@@ -1,0 +1,38 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/ibi/Prj/MeasuringData/app/build/intermediates/incremental/mergeReleaseResources/merged.dir/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "/home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/values-port/values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                },
+                {
+                    "source": "/home/ibi/Prj/MeasuringData/app/src/main/res/values-port/styles.xml",
+                    "from": {
+                        "startLines": "49,86,74,88,90,79,69,60,62",
+                        "startColumns": "4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "2287,3782,3322,3876,3960,3478,3099,2718,2749",
+                        "endLines": "55,86,77,88,93,84,72,60,65",
+                        "endColumns": "12,90,12,80,12,12,12,27,12",
+                        "endOffsets": "2704,3868,3470,3952,4159,3774,3314,2741,2927"
+                    },
+                    "to": {
+                        "startLines": "3,10,11,15,16,20,26,30,31",
+                        "startColumns": "4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "111,527,617,767,847,1048,1344,1561,1588",
+                        "endLines": "9,10,14,15,19,25,29,30,34",
+                        "endColumns": "12,89,12,79,12,12,12,26,12",
+                        "endOffsets": "522,612,762,842,1043,1339,1556,1583,1763"
+                    }
+                }
+            ]
+        }
+    ]
+}

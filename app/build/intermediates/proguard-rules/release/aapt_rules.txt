@@ -1,0 +1,189 @@
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:68
+-keep class androidx.core.app.CoreComponentFactory { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:159
+-keep class androidx.lifecycle.ProcessLifecycleOwnerInitializer { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:78
+-keep class ch.zhaw.android.measuringdata.MainActivity { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:134
+-keep class ch.zhaw.android.measuringdata.uart.BtService { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:103
+-keep class ch.zhaw.android.measuringdata.uart.DeviceListActivity { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:129
+-keep class ch.zhaw.android.measuringdata.ui.AboutActivity { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:108
+-keep class ch.zhaw.android.measuringdata.ui.ChartActivity { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:125
+-keep class ch.zhaw.android.measuringdata.ui.SettingsActivity { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:90
+-keep class ch.zhaw.android.measuringdata.ui.UartActivity { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:151
+-keep class no.nordicsemi.android.support.v18.scanner.PendingIntentReceiver { <init>(); }
+# Referenced at /home/ibi/Prj/MeasuringData/app/build/intermediates/merged_manifests/release/AndroidManifest.xml:142
+-keep class no.nordicsemi.android.support.v18.scanner.ScannerService { <init>(); }
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout-watch-v20/abc_alert_dialog_title_material.xml:53
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog_title.xml:41
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog_actions.xml:45
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog.xml:51
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_title_material.xml:56
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_material.xml:52
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_button_bar_material.xml:43
+-keep class android.widget.Space { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_select_dialog_material.xml:23
+-keep class androidx.appcompat.app.AlertController$RecycleListView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_action_menu_item_layout.xml:17
+-keep class androidx.appcompat.view.menu.ActionMenuItemView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_expanded_menu_layout.xml:17
+-keep class androidx.appcompat.view.menu.ExpandedMenuView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_popup_menu_item_layout.xml:17
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_list_menu_item_layout.xml:17
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_cascading_menu_item_layout.xml:20
+-keep class androidx.appcompat.view.menu.ListMenuItemView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_toolbar.xml:27
+-keep class androidx.appcompat.widget.ActionBarContainer { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_toolbar.xml:43
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_action_mode_bar.xml:19
+-keep class androidx.appcompat.widget.ActionBarContextView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_toolbar.xml:17
+-keep class androidx.appcompat.widget.ActionBarOverlayLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_action_menu_layout.xml:17
+-keep class androidx.appcompat.widget.ActionMenuView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_activity_chooser_view.xml:19
+-keep class androidx.appcompat.widget.ActivityChooserView$InnerLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog.xml:17
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_material.xml:18
+-keep class androidx.appcompat.widget.AlertDialogLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog_actions.xml:26
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_button_bar_material.xml:26
+-keep class androidx.appcompat.widget.ButtonBarLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_content_include.xml:19
+-keep class androidx.appcompat.widget.ContentFrameLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog_title.xml:36
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_title_material.xml:45
+-keep class androidx.appcompat.widget.DialogTitle { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_simple_overlay_action_mode.xml:23
+-keep class androidx.appcompat.widget.FitWindowsFrameLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_simple.xml:17
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_dialog_title_material.xml:22
+-keep class androidx.appcompat.widget.FitWindowsLinearLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_search_view.xml:75
+-keep class androidx.appcompat.widget.SearchView$SearchAutoComplete { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout-v26/abc_screen_toolbar.xml:37
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/content_chart.xml:98
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_uart.xml:61
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_main.xml:60
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_chart.xml:60
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_toolbar.xml:36
+-keep class androidx.appcompat.widget.Toolbar { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_simple_overlay_action_mode.xml:32
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_screen_simple.xml:25
+-keep class androidx.appcompat.widget.ViewStubCompat { <init>(...); }
+
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/content_chart.xml:89
+-keep class androidx.cardview.widget.CardView { <init>(...); }
+
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/content_main.xml:48
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/content_chart.xml:94
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_uart.xml:70
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_settings.xml:48
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_about.xml:48
+-keep class androidx.constraintlayout.widget.ConstraintLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_bottom_sheet_dialog.xml:26
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_uart.xml:48
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_main.xml:48
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_chart.xml:48
+-keep class androidx.coordinatorlayout.widget.CoordinatorLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_alert_dialog.xml:40
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/fd489cc717da6385d5c6e3408a7be1ef/res/layout/abc_alert_dialog_material.xml:41
+-keep class androidx.core.widget.NestedScrollView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_volume_control.xml:43
+-keep class androidx.mediarouter.app.MediaRouteExpandCollapseButton { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_volume_control.xml:34
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_controller_volume_item.xml:43
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_cast_route_item.xml:53
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_cast_group_volume_item.xml:43
+-keep class androidx.mediarouter.app.MediaRouteVolumeSlider { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_controller_material_dialog_b.xml:87
+-keep class androidx.mediarouter.app.OverlayListView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_picker_dialog.xml:34
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/19af187550a4f7a8d35babcffdd06e77/res/layout/mr_cast_dialog.xml:23
+-keep class androidx.recyclerview.widget.RecyclerView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_calendar_month_pager.xml:18
+-keep class androidx.viewpager.widget.ViewPager { <init>(...); }
+
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/content_chart.xml:110
+-keep class com.github.mikephil.charting.charts.LineChart { <init>(...); }
+
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_uart.xml:56
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_main.xml:55
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_chart.xml:55
+-keep class com.google.android.material.appbar.AppBarLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_toolbar_surface.xml:16
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_toolbar_elevation.xml:16
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_toolbar_custom_background.xml:16
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_toolbar.xml:16
+-keep class com.google.android.material.appbar.MaterialToolbar { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_calendar_month_bar.xml:26
+-keep class com.google.android.material.button.MaterialButton { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_reflow_chipgroup.xml:25
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_action_chip.xml:17
+-keep class com.google.android.material.chip.Chip { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/test_reflow_chipgroup.xml:19
+-keep class com.google.android.material.chip.ChipGroup { <init>(...); }
+
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_main.xml:71
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/activity_chart.xml:95
+-keep class com.google.android.material.floatingactionbutton.FloatingActionButton { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_bottom_navigation_item.xml:27
+-keep class com.google.android.material.internal.BaselineLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_text_input_start_icon.xml:18
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_text_input_end_icon.xml:18
+-keep class com.google.android.material.internal.CheckableImageButton { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_navigation_item.xml:17
+-keep class com.google.android.material.internal.NavigationMenuItemView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_navigation_menu.xml:17
+-keep class com.google.android.material.internal.NavigationMenuView { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_layout_snackbar.xml:18
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_layout_snackbar.xml:18
+-keep class com.google.android.material.snackbar.Snackbar$SnackbarLayout { <init>(...); }
+
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/mtrl_layout_snackbar_include.xml:18
+# Referenced at /home/ibi/.gradle/caches/transforms-2/files-2.1/9b6bc2d8e9a17a8bef7d680831b01880/res/layout/design_layout_snackbar_include.xml:18
+-keep class com.google.android.material.snackbar.SnackbarContentLayout { <init>(...); }
+
+# Referenced at /home/ibi/Prj/MeasuringData/app/src/main/res/layout/content_chart.xml:185
+-keep class pl.droidsonroids.gif.GifImageView { <init>(...); }
+

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instant-run
+    abi="arm64-v8a,armeabi-v7a,armeabi"
+    api-level="28"
+    build-mode="FULL"
+    density="xhdpi"
+    format="10"
+    plugin-version="3.4.0"
+    timestamp="1566302392796"
+    token="-4215402835632673872"
+    verifier="FULL_BUILD_REQUESTED" >
+
+    <task
+        name="javac"
+        duration="0" />
+    <task
+        name="instant-run-dex"
+        duration="0" />
+    <task
+        name="instant-run-transform"
+        duration="0" />
+    <task
+        name="verifier"
+        duration="0" />
+
+    <artifact
+        location="/home/ibi/Prj/MeasuringData/app/build/intermediates/resources/instant-run/debug/resources-debug.apk"
+        type="SPLIT" />
+
+</instant-run>

@@ -1,0 +1,4 @@
+#Sun Jan 05 20:56:25 CET 2020
+base.0=/home/ibi/Prj/MeasuringData/app/build/intermediates/transforms/r8/debug/0
+path.0=classes.dex
+renamed.0=classes.dex
