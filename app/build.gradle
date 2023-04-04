@@ -90,14 +90,14 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0-alpha06'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha09'
     // Lifecycle extensions
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     // Butter Knife
     implementation 'com.jakewharton:butterknife:10.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     //implementation 'androidx.legacy:legacy-support-v13:1.0.0-beta01'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0-beta01'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
     // Brings the new BluetoothLeScanner API to older platforms
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.0'
