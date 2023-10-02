@@ -2,6 +2,11 @@
 
 I, the developer of the MeasuringData application, hereby state, to the best of my knowledge and belief, that I have not programmed this app to collect any personally identifiable information.
 
+## Data Collection
+
+**We do not collect any personal data:** MeasuringData does not collect, store, or share any personally identifiable information (PII) or sensitive data from our users. This includes but is not limited to names, email addresses, phone numbers, and any other personal information.
+
+
 ## Explanation of Permissions Requested in the App
 
 Below is a list of permissions required by the MeasuringData application and an explanation of why each permission is necessary.
