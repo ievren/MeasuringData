@@ -1,4 +1,4 @@
-# Disch Sana – Datenschutzerklärung (Entwurf)
+# Disch Sana – Datenschutzerklärung
 
 ## Verantwortliche Stelle und Kontakt
 
